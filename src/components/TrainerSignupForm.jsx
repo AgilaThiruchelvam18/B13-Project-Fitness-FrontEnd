@@ -61,23 +61,28 @@ const TrainerSignup = () => {
               if (key === "coverMedia" && values.coverMedia) {
                 formData.append("coverMedia", values.coverMedia);
               } else if (Array.isArray(values[key])) {
-                formData.append(key, JSON.stringify(values[key]));
+                formData.append(key, JSON.stringify(values[key])); // Convert arrays to JSON
               } else {
                 formData.append(key, values[key]);
               }
             });
-
+          
             try {
-              await axios.post("https://fitnesshub-5yf3.onrender.com/api/trainer-auth/register", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-              });
+              const response = await axios.post(
+                "https://fitnesshub-5yf3.onrender.com/api/trainer-auth/register",
+                formData,
+                { headers: { "Content-Type": "multipart/form-data" } }
+              );
+              console.log("Success:", response.data);
               setMessage("Signup successful! Redirecting...");
               setTimeout(() => navigate("/trainer/login"), 2000);
             } catch (error) {
+              console.error("Error:", error.response?.data);
               setMessage(error.response?.data?.message || "Signup failed");
             }
             setSubmitting(false);
           }}
+          
         >
           {({ setFieldValue, isSubmitting }) => (
             <Form className="flex flex-col">
