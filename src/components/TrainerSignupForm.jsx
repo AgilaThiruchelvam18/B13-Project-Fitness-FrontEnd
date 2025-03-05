@@ -52,7 +52,7 @@ const TrainerSignup = () => {
             twitter: "",
             linkedin: "",
             youtube: "",
-            coverMedia: null,
+            coverMedia: "",
           }}
           validationSchema={validationSchema}
           onSubmit={async (values, { setSubmitting }) => {
