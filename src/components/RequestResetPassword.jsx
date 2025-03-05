@@ -9,7 +9,7 @@ const RequestResetPassword = () => {
 
   const handleReset = async () => {
     try {
-      await axios.post("https://fitnesshub-5yf3.onrender.com/api/user-auth/request-password-reset", { email });
+      await axios.post("http://fitnesshub-5yf3.onrender.com/api/user-auth/request-password-reset", { email });
       setMessage("Check your email for reset link.");
       // setTimeout(() => navigate("/login"), 3000);
     } catch (error) {
