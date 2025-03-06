@@ -1,7 +1,3 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
-
 const ProtectedRoute = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,15 +12,14 @@ const ProtectedRoute = () => {
       } catch (error) {
         setIsAuthenticated(false);
       } finally {
-        setLoading(false); // Stop loading once the check is done
+        setLoading(false);
       }
     };
     checkAuth();
   }, []);
 
-  if (loading) return <div>Loading...</div>; // Prevents immediate redirection
+  if (loading) return <div>Loading...</div>; // Prevents instant redirect
+  if (isAuthenticated === false) return <Navigate to="/customer/login" />; // Redirect only if false
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
+  return <Outlet />;
 };
-
-export default ProtectedRoute;
