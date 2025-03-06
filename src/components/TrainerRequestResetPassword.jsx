@@ -2,14 +2,16 @@ import { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-const TrainerRequestResetPassword = () => {
+const RequestResetPassword = () => {
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h2 className="text-2xl font-bold text-center mb-4">Trainer Reset Password</h2>
+        <h2 className="text-2xl font-bold text-center mb-4">Reset Password</h2>
 
         {message && <p className="text-green-500 text-center">{message}</p>}
 
@@ -26,11 +28,12 @@ const TrainerRequestResetPassword = () => {
                 "https://fitnesshub-5yf3.onrender.com/api/trainer-auth/request-password-reset",
                 values
               );
-              setMessage("Check your email for the reset link.");
+              setMessage("Check your email for reset link.");
+              setSubmitting(false); // Stop loading after success
             } catch (error) {
               setMessage("Failed to send reset link.");
+              setSubmitting(false); // Stop loading on error
             }
-            setSubmitting(false);
           }}
         >
           {({ isSubmitting }) => (
@@ -64,4 +67,4 @@ const TrainerRequestResetPassword = () => {
   );
 };
 
-export default TrainerRequestResetPassword;
+export default RequestResetPassword;
