@@ -1,4 +1,7 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import axios from "axios";
+
 const ProtectedRoute = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -7,7 +10,7 @@ const ProtectedRoute = () => {
     const checkAuth = async () => {
       try {
         await axios.get("https://fitnesshub-5yf3.onrender.com/api/customer/dashboard", { 
-          withCredentials: true 
+          withCredentials: true // ✅ Ensures cookies are sent
         });
         setIsAuthenticated(true);
       } catch (error) {
@@ -19,9 +22,10 @@ const ProtectedRoute = () => {
     checkAuth();
   }, []);
 
-  if (loading) return <div>Loading...</div>; // Prevents instant redirect
-  if (isAuthenticated === false) return <Navigate to="/customer/login" />; // Redirect only if false
+  if (loading) return <div>Loading...</div>; // ✅ Prevents instant redirect while checking auth
+  if (isAuthenticated === false) return <Navigate to="/customer/login" />; // ✅ Redirect to login if not authenticated
 
-  return <Outlet />;
+  return <Outlet />; // ✅ Renders protected content if authenticated
 };
+
 export default ProtectedRoute;
