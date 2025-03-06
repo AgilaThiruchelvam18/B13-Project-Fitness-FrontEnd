@@ -25,8 +25,10 @@ const LoginForm = () => {
             try {
               const response = await axios.post(
                 "https://fitnesshub-5yf3.onrender.com/api/user-auth/login",
-                values
+                values,
+                { withCredentials: true } // Add this line
               );
+              
               navigate("/customer/dashboard");
             } catch (error) {
               setMessage(error.response?.data?.message || "Login failed");

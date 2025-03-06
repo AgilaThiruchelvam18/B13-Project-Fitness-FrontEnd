@@ -1,21 +1,25 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // ✅ Correct import
+import ProtectedRoute from "../components/ProtectedRoute";
 import LoginForm from '../components/LoginForm';
 import SignupForm from '../components/SignupForm';
 import RequestResetPassword from "../components/RequestResetPassword.jsx";
 import ResetPassword from "../components/ResetPassword.jsx";
-import Dashboard from "../components/Dashboard.jsx";
+import Dashboard from "./CustomerDashboard.jsx";
+import CustomerDashboard from "./CustomerDashboard.jsx";
 
 function CustomerAuth() {
   return (
-    <Router>
+    
       <Routes>
-        <Route path="/customer/signup" element={<SignupForm />} />
-        <Route path="/customer/login" element={<LoginForm />} />
-        <Route path="/customer/forgot-password" element={<RequestResetPassword />} />
-        <Route path="/customer/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/customer/dashboard" element={<Dashboard />} />
+        <Route path="signup" element={<SignupForm />} />
+        <Route path="login" element={<LoginForm />} />
+        <Route path="forgot-password" element={<RequestResetPassword />} />
+        <Route path="reset-password/:token" element={<ResetPassword />} />
+        <Route path="dashboard/*" element={<ProtectedRoute />}>
+    <Route path="" element={<CustomerDashboard />} />
+  </Route>
       </Routes>
-    </Router>
+    
   );
 }
 

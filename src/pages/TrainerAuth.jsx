@@ -1,18 +1,25 @@
-import { useState } from 'react';
-import Modal from '../components/Modal';
-import LoginForm from '../components/LoginForm';
-import SignupForm from '../components/SignupForm';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // ✅ Correct import
+import ProtectedRoute from "../components/ProtectedRoute";
+import TrainerLoginForm from '../components/TrainerLoginForm';
+import TrainerSignupForm from '../components/TrainerSignupForm';
+import TrainerRequestResetPassword from "../components/TrainerRequestResetPassword.jsx";
+import TrainerResetPassword from "../components/TrainerResetPassword.jsx";
+import TrainerDashboard from "../pages/TrainerDashboard.jsx";
 
-export default function CustomerAuth() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showLogin, setShowLogin] = useState(true);
-
+function TrainerAuth() {
   return (
-    <div>
-      <button onClick={() => setIsOpen(true)}>Customer Login</button>
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        {showLogin ? <LoginForm onSwitch={() => setShowLogin(false)} /> : <SignupForm onSwitch={() => setShowLogin(true)} />}
-      </Modal>
-    </div>
+    
+      <Routes>
+      <Route path="signup" element={<TrainerSignupForm />} />
+        <Route path="login" element={<TrainerLoginForm />} />
+        <Route path="forgot-password" element={<TrainerRequestResetPassword />} />
+        <Route path="reset-password/:token" element={<TrainerResetPassword />} />
+        <Route path="dashboard/*" element={<ProtectedRoute />}>
+    <Route path="" element={<TrainerDashboard />} />
+  </Route>
+      </Routes>
+   
   );
 }
+
+export default TrainerAuth;
