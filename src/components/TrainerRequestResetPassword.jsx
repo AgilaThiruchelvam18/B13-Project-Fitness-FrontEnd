@@ -4,7 +4,7 @@ import * as Yup from "yup";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const RequestResetPassword = () => {
+const TrainerRequestResetPassword = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
@@ -67,4 +67,4 @@ const RequestResetPassword = () => {
   );
 };
 
-export default RequestResetPassword;
+export default TrainerRequestResetPassword;
