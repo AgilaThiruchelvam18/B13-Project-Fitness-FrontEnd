@@ -17,18 +17,18 @@ const TrainerSignup = () => {
     confirmPassword: Yup.string()
       .oneOf([Yup.ref("password"), null], "Passwords must match")
       .required("Confirm Password is required"),
-    phone: Yup.string()
-      .matches(/^\d{10}$/, "Phone number must be 10 digits")
-      .required("Phone number is required"),
-    expertise: Yup.array().min(1, "At least one expertise is required"),
-    availability: Yup.array().min(1, "At least one availability slot is required"),
-    bio: Yup.string().max(500, "Bio cannot exceed 500 characters"),
-    facebook: Yup.string().url("Invalid URL").nullable(),
-    instagram: Yup.string().url("Invalid URL").nullable(),
-    twitter: Yup.string().url("Invalid URL").nullable(),
-    linkedin: Yup.string().url("Invalid URL").nullable(),
-    youtube: Yup.string().url("Invalid URL").nullable(),
-    coverMedia: Yup.mixed().required("Cover media is required"),
+    // phone: Yup.string()
+    //   .matches(/^\d{10}$/, "Phone number must be 10 digits")
+    //   .required("Phone number is required"),
+    // expertise: Yup.array().min(1, "At least one expertise is required"),
+    // availability: Yup.array().min(1, "At least one availability slot is required"),
+    // bio: Yup.string().max(500, "Bio cannot exceed 500 characters"),
+    // facebook: Yup.string().url("Invalid URL").nullable(),
+    // instagram: Yup.string().url("Invalid URL").nullable(),
+    // twitter: Yup.string().url("Invalid URL").nullable(),
+    // linkedin: Yup.string().url("Invalid URL").nullable(),
+    // youtube: Yup.string().url("Invalid URL").nullable(),
+    // coverMedia: Yup.mixed().required("Cover media is required"),
   });
 
   return (
@@ -43,16 +43,16 @@ const TrainerSignup = () => {
             email: "",
             password: "",
             confirmPassword: "",
-            phone: "",
-            expertise: [],
-            availability: [],
-            bio: "",
-            facebook: "",
-            instagram: "",
-            twitter: "",
-            linkedin: "",
-            youtube: "",
-            coverMedia: "",
+            // phone: "",
+            // expertise: [],
+            // availability: [],
+            // bio: "",
+            // facebook: "",
+            // instagram: "",
+            // twitter: "",
+            // linkedin: "",
+            // youtube: "",
+            // coverMedia: "",
           }}
           validationSchema={validationSchema}
           onSubmit={async (values, { setSubmitting }) => {
@@ -98,7 +98,7 @@ const TrainerSignup = () => {
               <Field type="password" name="confirmPassword" placeholder="Confirm Password" className="border p-2 rounded mt-1" />
               <ErrorMessage name="confirmPassword" component="div" className="text-red-500 text-sm" />
 
-              <Field type="text" name="phone" placeholder="Phone Number" className="border p-2 rounded mt-1" />
+              {/* <Field type="text" name="phone" placeholder="Phone Number" className="border p-2 rounded mt-1" />
               <ErrorMessage name="phone" component="div" className="text-red-500 text-sm" />
 
               <Field type="text" name="bio" placeholder="Short Bio" className="border p-2 rounded mt-1" />
@@ -140,7 +140,7 @@ const TrainerSignup = () => {
               <label className="mt-2">Upload Cover Media:</label>
               <input type="file" accept="image/*,video/*" className="border p-2 rounded mt-1"
                 onChange={(event) => setFieldValue("coverMedia", event.currentTarget.files[0])} />
-              <ErrorMessage name="coverMedia" component="div" className="text-red-500 text-sm" />
+              <ErrorMessage name="coverMedia" component="div" className="text-red-500 text-sm" /> */}
 
               <button type="submit" disabled={isSubmitting} className="mt-4 bg-blue-500 text-white py-2 rounded">
                 {isSubmitting ? "Signing up..." : "Sign Up"}
