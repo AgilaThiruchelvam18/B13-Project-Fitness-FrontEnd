@@ -4,7 +4,6 @@ import LoginForm from '../components/LoginForm';
 import SignupForm from '../components/SignupForm';
 import RequestResetPassword from "../components/RequestResetPassword.jsx";
 import ResetPassword from "../components/ResetPassword.jsx";
-import Dashboard from "./CustomerDashboard.jsx";
 import CustomerDashboard from "./CustomerDashboard.jsx";
 
 function CustomerAuth() {
@@ -16,7 +15,7 @@ function CustomerAuth() {
         <Route path="forgot-password" element={<RequestResetPassword />} />
         <Route path="reset-password/:token" element={<ResetPassword />} />
         <Route path="dashboard/*" element={<ProtectedRoute />}>
-    <Route path="" element={<CustomerDashboard />} />
+    <Route path="*" element={<CustomerDashboard />} />
   </Route>
       </Routes>
     
