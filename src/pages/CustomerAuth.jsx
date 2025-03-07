@@ -14,7 +14,7 @@ function CustomerAuth() {
         <Route path="login" element={<LoginForm />} />
         <Route path="forgot-password" element={<RequestResetPassword />} />
         <Route path="reset-password/:token" element={<ResetPassword />} />
-        <Route path="dashboard/*" element={<ProtectedRoute />}>
+        <Route path="CustomerDashboard/*" element={<ProtectedRoute />}>
     <Route path="*" element={<CustomerDashboard />} />
   </Route>
       </Routes>

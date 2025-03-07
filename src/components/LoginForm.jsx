@@ -29,7 +29,7 @@ const LoginForm = () => {
                 { withCredentials: true } // Add this line
               );
               
-              navigate("/customer/dashboard");
+              navigate("/customer/CustomerDashboard/myfitness");
             } catch (error) {
               setMessage(error.response?.data?.message || "Login failed");
             }
