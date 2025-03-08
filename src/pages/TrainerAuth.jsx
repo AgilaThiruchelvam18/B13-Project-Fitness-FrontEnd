@@ -14,7 +14,7 @@ function TrainerAuth() {
         <Route path="login" element={<TrainerLoginForm />} />
         <Route path="forgot-password" element={<TrainerRequestResetPassword />} />
         <Route path="reset-password/:token" element={<TrainerResetPassword />} />
-        <Route path="dashboard/*" element={<ProtectedRoute />}>
+        <Route path="TrainerDashboard/*" element={<ProtectedRoute />}>
     <Route path="" element={<TrainerDashboard />} />
   </Route>
       </Routes>

@@ -1,79 +1,126 @@
-import React from "react";
-import cardio from "../assets/cardio.png"; // Sample image
-import TrainerDetails from "./TrainerDetails";
-import {Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import cardio from "../assets/cardio.png"; // Placeholder image
 
+const categories = ["All", "Yoga", "Cardio", "Strength", "Zumba", "Meditation"];
 
 const UpcomingClasses = () => {
+  const [classes, setClasses] = useState([]); // Store fetched classes
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [bookingStatus, setBookingStatus] = useState(null); // ✅ Track booking status messages
+
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const response = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes", {
+          withCredentials: true, // ✅ Ensures cookies are sent
+        });
+        setClasses(response.data);
+      } catch (err) {
+        setError("Failed to fetch classes. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchClasses();
+  }, []);
+
+  // ✅ Filter classes based on category selection
+  const filteredClasses =
+    selectedCategory === "All"
+      ? classes
+      : classes.filter((cls) => cls.category.toLowerCase() === selectedCategory.toLowerCase());
+
+  // ✅ Handle booking action
+  const handleBookNow = async (classId) => {
+    try {
+      const response = await axios.post(
+        "https://fitnesshub-5yf3.onrender.com/api/bookings",
+        { classId },
+        { withCredentials: true } // ✅ Send cookies for authentication
+      );
+
+      setBookingStatus({ message: response.data.message, type: "success" });
+    } catch (err) {
+      setBookingStatus({ message: err.response?.data?.message || "Booking failed!", type: "error" });
+    }
+  };
+
   return (
-    <div className="max-w-6xl mx-auto mt-10 overflow-y-auto">
+    <div className="max-w-6xl mx-auto mt-10 p-6">
       <h2 className="text-2xl font-semibold mb-6">Upcoming Classes</h2>
 
-      {/* Grid Layout */}
+      {/* ✅ Display Booking Status Messages */}
+      {bookingStatus && (
+        <div className={`mb-4 p-2 text-center rounded ${bookingStatus.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+          {bookingStatus.message}
+        </div>
+      )}
+
+      {/* Category Filters */}
+      <div className="flex flex-wrap gap-3 mb-6">
+        {categories.map((category) => (
+          <button
+            key={category}
+            onClick={() => setSelectedCategory(category)}
+            className={`px-4 py-2 rounded-md text-sm font-semibold ${
+              selectedCategory === category ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+
+      {/* Loading State */}
+      {loading && <p className="text-center text-gray-600">Loading classes...</p>}
+
+      {/* Error Message */}
+      {error && <p className="text-center text-red-500">{error}</p>}
+
+      {/* Class Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {/* Sample Class Box */}
-        <div className="bg-gray-100 p-4 rounded-lg shadow-md flex flex-col items-center text-center">
-          {/* Image */}
-          <img
-            src={cardio}
-            alt="cardio"
-            className="w-32 h-32 object-cover rounded-lg mb-3"
-          />
+        {filteredClasses.length > 0 ? (
+          filteredClasses.map((cls) => (
+            <div key={cls._id} className="bg-gray-100 p-4 rounded-lg shadow-md flex flex-col items-center text-center">
+              {/* Image */}
+              <img src={cls.image || cardio} alt={cls.title} className="w-32 h-32 object-cover rounded-lg mb-3" />
 
-          {/* Event & Trainer Details */}
-          <h3 className="text-lg font-semibold">Yoga Class</h3>
-          <div className="flex flex-row w-full justify-between">
-          <p className="text-gray-600">
-  <Link to={`/customer/CustomerDashboard/mybookings/TrainerDetails`} className="text-blue-500 hover:underline">
-    Agila
-  </Link>
-</p>
-            <p className="text-yellow-500">⭐ 4.5/5</p>
-          </div>
-          <div className="w-full flex flex-row justify-between">
-            <p className="text-sm text-gray-500"> Cardio</p>
-            <p className="text-sm text-gray-500">⏳ 45 mins</p>
-          </div>
+              {/* Event & Trainer Details */}
+              <h3 className="text-lg font-semibold">{cls.title}</h3>
+              <div className="flex flex-row w-full justify-between">
+                <p className="text-gray-600">
+                  <Link
+                    to={`/customer/CustomerDashboard/mybookings/TrainerDetails`}
+                    className="text-blue-500 hover:underline"
+                  >
+                    {cls.trainer?.name || "Trainer Info Unavailable"} {/* ✅ Prevents UI crash if trainer is missing */}
+                  </Link>
+                </p>
+                <p className="text-yellow-500">⭐ {cls.rating || "4.5"}/5</p>
+              </div>
+              <div className="w-full flex flex-row justify-between">
+                <p className="text-sm text-gray-500">{cls.category}</p>
+                <p className="text-sm text-gray-500">⏳ {cls.duration} mins</p>
+              </div>
 
-          {/* Book Now Button */}
-          <div className="mt-4 w-full">
-            <button className="w-full p-2 bg-blue-500 text-white rounded hover:bg-green-600">
-              Book Now
-            </button>
-          </div>
-        </div>
-
-        {/* Duplicate for another sample class */}
-        <div className="bg-gray-100 p-4 rounded-lg shadow-md flex flex-col items-center text-center">
-          {/* Image */}
-          <img
-            src={cardio}
-            alt="cardio"
-            className="w-32 h-32 object-cover rounded-lg mb-3"
-          />
-
-          {/* Event & Trainer Details */}
-          <h3 className="text-lg font-semibold">Zumba Class</h3>
-          <div className="flex flex-row w-full justify-between">
-          <p className="text-gray-600">
-  <Link to={`/customer/CustomerDashboard/mybookings/TrainerDetails`} className="text-blue-500 hover:underline">
-    Agila
-  </Link>
-</p>
-            <p className="text-yellow-500">⭐ 4.2/5</p>
-          </div>
-          <div className="w-full flex flex-row justify-between">
-            <p className="text-sm text-gray-500"> Dance</p>
-            <p className="text-sm text-gray-500">⏳ 1 Hour</p>
-          </div>
-
-          {/* Book Now Button */}
-          <div className="mt-4 w-full">
-            <button className="w-full p-2 bg-blue-500 text-white rounded hover:bg-green-600">
-              Book Now
-            </button>
-          </div>
-        </div>
+              {/* Book Now Button */}
+              <div className="mt-4 w-full">
+                <button
+                  className="w-full p-2 bg-blue-500 text-white rounded hover:bg-green-600"
+                  onClick={() => handleBookNow(cls._id)}
+                >
+                  Book Now
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-600">No classes available in this category.</p>
+        )}
       </div>
     </div>
   );

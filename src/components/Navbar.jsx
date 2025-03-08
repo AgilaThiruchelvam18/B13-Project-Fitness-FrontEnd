@@ -1,6 +1,5 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import CustomerAuth from "../pages/CustomerAuth";
 const Navbar = () => {
   const navigate = useNavigate();
 

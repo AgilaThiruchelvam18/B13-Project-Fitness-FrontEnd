@@ -6,6 +6,8 @@ import MyFitness from "../components/MyFitness";
 import MyBookings from "../components/MyBookings";
 import BookingHistory from "../components/BookingHistory";
 import UpcomingClasses from "../components/UpcomingClasses";
+import TrainersList from "../components/TrainersList";
+import TrainerDetails from "../components/TrainerDetails";
 import ProtectedRoute from "../components/ProtectedRoute"; // Ensure protected access
 import { useEffect } from "react";
 //import { useNavigate } from "react-router-dom";
@@ -25,9 +27,12 @@ const CustomerDashboard = () => {
         <DashPage>
           <Routes>
             <Route path="myfitness" element={<MyFitness />} />
-            <Route path="mybookings" element={<MyBookings />} />
+            <Route path="/myfitness/trainerslist/:category" element={<TrainersList />} />   
+           <Route path="mybookings" element={<MyBookings />} />
+           <Route path="TrainerDetails" element={<TrainerDetails />} />
             <Route path="bookinghistory" element={<BookingHistory />} />
             <Route path="upcomingclasses" element={<UpcomingClasses />} />
+            TrainerDetails
           </Routes>
         </DashPage>
       </div>
