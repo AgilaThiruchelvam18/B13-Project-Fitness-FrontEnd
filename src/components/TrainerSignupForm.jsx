@@ -1,158 +1,144 @@
 import { useState } from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
 
 const TrainerSignup = () => {
-  const [message, setMessage] = useState("");
-  const navigate = useNavigate();
-
-  const validationSchema = Yup.object({
-    userName: Yup.string().required("Username is required"),
-    email: Yup.string().email("Invalid email").required("Email is required"),
-    password: Yup.string()
-      .min(6, "Password must be at least 6 characters")
-      .required("Password is required"),
-    confirmPassword: Yup.string()
-      .oneOf([Yup.ref("password"), null], "Passwords must match")
-      .required("Confirm Password is required"),
-    // phone: Yup.string()
-    //   .matches(/^\d{10}$/, "Phone number must be 10 digits")
-    //   .required("Phone number is required"),
-    // expertise: Yup.array().min(1, "At least one expertise is required"),
-    // availability: Yup.array().min(1, "At least one availability slot is required"),
-    // bio: Yup.string().max(500, "Bio cannot exceed 500 characters"),
-    // facebook: Yup.string().url("Invalid URL").nullable(),
-    // instagram: Yup.string().url("Invalid URL").nullable(),
-    // twitter: Yup.string().url("Invalid URL").nullable(),
-    // linkedin: Yup.string().url("Invalid URL").nullable(),
-    // youtube: Yup.string().url("Invalid URL").nullable(),
-    // coverMedia: Yup.mixed().required("Cover media is required"),
+  const [formData, setFormData] = useState({
+    userName: "",
+    email: "",
+    password: "",
+    expertise: "",
+    phone: "",
+    bio: "",
+    certifications: "",
+    availability: [{ day: "", timeSlots: [""] }],
+    coverMedia: null,
+    coverMediaType: "image",
+    socialLinks: {
+      facebook: "",
+      instagram: "",
+      twitter: "",
+      linkedin: "",
+      youtube: "",
+    },
   });
 
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name.startsWith("socialLinks.")) {
+      setFormData((prevData) => ({
+        ...prevData,
+        socialLinks: {
+          ...prevData.socialLinks,
+          [name.split(".")[1]]: value,
+        },
+      }));
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const handleAvailabilityChange = (index, field, value) => {
+    const newAvailability = [...formData.availability];
+    if (field === "timeSlots") {
+      newAvailability[index].timeSlots = value.split(",");
+    } else {
+      newAvailability[index][field] = value;
+    }
+    setFormData({ ...formData, availability: newAvailability });
+  };
+
+  const addAvailability = () => {
+    setFormData({
+      ...formData,
+      availability: [...formData.availability, { day: "", timeSlots: [""] }],
+    });
+  };
+
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, coverMedia: e.target.files[0] });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    const formDataToSend = new FormData();
+    Object.keys(formData).forEach((key) => {
+      if (key === "coverMedia" && formData.coverMedia) {
+        formDataToSend.append("coverMedia", formData.coverMedia);
+      } else if (key === "availability") {
+        formDataToSend.append("availability", JSON.stringify(formData.availability));
+      } else if (key === "socialLinks") {
+        formDataToSend.append("socialLinks", JSON.stringify(formData.socialLinks));
+      } else {
+        formDataToSend.append(key, formData[key]);
+      }
+    });
+
+    try {
+      const res = await axios.post(
+        "https://fitnesshub-5yf3.onrender.com/api/authtrainer/register",
+        formDataToSend,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      setSuccess("Trainer registered successfully!");
+    } catch (error) {
+      setError(error.response?.data?.message || "Error registering trainer");
+    }
+  };
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-        <h2 className="text-2xl font-bold text-center mb-4">Trainer Signup</h2>
-        {message && <p className="text-red-500 text-center">{message}</p>}
+    <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg">
+      <h2 className="text-2xl font-semibold text-center mb-4">Trainer Signup</h2>
+      {error && <p className="text-red-500 text-center">{error}</p>}
+      {success && <p className="text-green-500 text-center">{success}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Basic Info */}
+        <input type="text" name="userName" placeholder="Full Name" value={formData.userName} onChange={handleChange} className="input-field" required />
+        <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="input-field" required />
+        <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} className="input-field" required />
+        <input type="text" name="phone" placeholder="Phone Number" value={formData.phone} onChange={handleChange} className="input-field" />
+        <textarea name="bio" placeholder="Bio" value={formData.bio} onChange={handleChange} className="input-field"></textarea>
 
-        <Formik
-          initialValues={{
-            userName: "",
-            email: "",
-            password: "",
-            confirmPassword: "",
-            // phone: "",
-            // expertise: [],
-            // availability: [],
-            // bio: "",
-            // facebook: "",
-            // instagram: "",
-            // twitter: "",
-            // linkedin: "",
-            // youtube: "",
-            // coverMedia: "",
-          }}
-          validationSchema={validationSchema}
-          onSubmit={async (values, { setSubmitting }) => {
-            const formData = new FormData();
-            Object.keys(values).forEach((key) => {
-              if (key === "coverMedia" && values.coverMedia) {
-                formData.append("coverMedia", values.coverMedia);
-              } else if (Array.isArray(values[key])) {
-                formData.append(key, JSON.stringify(values[key])); // Convert arrays to JSON
-              } else {
-                formData.append(key, values[key]);
-              }
-            });
-          
-            try {
-              const response = await axios.post(
-                "https://fitnesshub-5yf3.onrender.com/api/trainer-auth/register",
-                formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
-              );
-              console.log("Success:", response.data);
-              setMessage("Signup successful! Redirecting...");
-              setTimeout(() => navigate("/trainer/login"), 2000);
-            } catch (error) {
-              console.error("Error:", error.response?.data);
-              setMessage(error.response?.data?.message || "Signup failed");
-            }
-            setSubmitting(false);
-          }}
-          
-        >
-          {({ setFieldValue, isSubmitting }) => (
-            <Form className="flex flex-col">
-              <Field type="text" name="userName" placeholder="Username" className="border p-2 rounded mt-1" />
-              <ErrorMessage name="userName" component="div" className="text-red-500 text-sm" />
+        {/* Expertise */}
+        <input type="text" name="expertise" placeholder="Expertise (comma separated)" value={formData.expertise} onChange={handleChange} className="input-field" />
 
-              <Field type="email" name="email" placeholder="Email" className="border p-2 rounded mt-1" />
-              <ErrorMessage name="email" component="div" className="text-red-500 text-sm" />
+        {/* Certifications */}
+        <input type="text" name="certifications" placeholder="Certifications (comma separated)" value={formData.certifications} onChange={handleChange} className="input-field" />
 
-              <Field type="password" name="password" placeholder="Password" className="border p-2 rounded mt-1" />
-              <ErrorMessage name="password" component="div" className="text-red-500 text-sm" />
+        {/* Availability */}
+        <div>
+          <label className="block font-medium">Availability:</label>
+          {formData.availability.map((slot, index) => (
+            <div key={index} className="flex gap-2">
+              <input type="text" placeholder="Day" value={slot.day} onChange={(e) => handleAvailabilityChange(index, "day", e.target.value)} className="input-field w-1/2" />
+              <input type="text" placeholder="Time Slots (comma separated)" value={slot.timeSlots.join(",")} onChange={(e) => handleAvailabilityChange(index, "timeSlots", e.target.value)} className="input-field w-1/2" />
+            </div>
+          ))}
+          <button type="button" onClick={addAvailability} className="text-blue-500 text-sm">+ Add More</button>
+        </div>
 
-              <Field type="password" name="confirmPassword" placeholder="Confirm Password" className="border p-2 rounded mt-1" />
-              <ErrorMessage name="confirmPassword" component="div" className="text-red-500 text-sm" />
+        {/* Cover Media Upload */}
+        <label className="block font-medium">Profile Cover:</label>
+        <input type="file" accept="image/*,video/*" onChange={handleFileChange} className="input-field" />
 
-              {/* <Field type="text" name="phone" placeholder="Phone Number" className="border p-2 rounded mt-1" />
-              <ErrorMessage name="phone" component="div" className="text-red-500 text-sm" />
+        {/* Social Links */}
+        <div>
+          <label className="block font-medium">Social Links:</label>
+          <input type="url" name="socialLinks.facebook" placeholder="Facebook URL" value={formData.socialLinks.facebook} onChange={handleChange} className="input-field" />
+          <input type="url" name="socialLinks.instagram" placeholder="Instagram URL" value={formData.socialLinks.instagram} onChange={handleChange} className="input-field" />
+          <input type="url" name="socialLinks.twitter" placeholder="Twitter URL" value={formData.socialLinks.twitter} onChange={handleChange} className="input-field" />
+          <input type="url" name="socialLinks.linkedin" placeholder="LinkedIn URL" value={formData.socialLinks.linkedin} onChange={handleChange} className="input-field" />
+          <input type="url" name="socialLinks.youtube" placeholder="YouTube URL" value={formData.socialLinks.youtube} onChange={handleChange} className="input-field" />
+        </div>
 
-              <Field type="text" name="bio" placeholder="Short Bio" className="border p-2 rounded mt-1" />
-              <ErrorMessage name="bio" component="div" className="text-red-500 text-sm" />
-
-              <label className="mt-2">Expertise:</label>
-              <Field as="select" name="expertise" multiple className="border p-2 rounded mt-1">
-                <option value="yoga">Yoga</option>
-                <option value="strength">Strength Training</option>
-                <option value="cardio">Cardio</option>
-                <option value="pilates">Pilates</option>
-              </Field>
-              <ErrorMessage name="expertise" component="div" className="text-red-500 text-sm" />
-
-              <label className="mt-2">Availability:</label>
-              <Field as="select" name="availability" multiple className="border p-2 rounded mt-1">
-                <option value="morning">Morning</option>
-                <option value="afternoon">Afternoon</option>
-                <option value="evening">Evening</option>
-              </Field>
-              <ErrorMessage name="availability" component="div" className="text-red-500 text-sm" />
-
-              <label className="mt-2">Social Links:</label>
-              <Field type="text" name="facebook" placeholder="Facebook URL" className="border p-2 rounded mt-1" />
-              <ErrorMessage name="facebook" component="div" className="text-red-500 text-sm" />
-
-              <Field type="text" name="instagram" placeholder="Instagram URL" className="border p-2 rounded mt-1" />
-              <ErrorMessage name="instagram" component="div" className="text-red-500 text-sm" />
-
-              <Field type="text" name="twitter" placeholder="Twitter URL" className="border p-2 rounded mt-1" />
-              <ErrorMessage name="twitter" component="div" className="text-red-500 text-sm" />
-
-              <Field type="text" name="linkedin" placeholder="LinkedIn URL" className="border p-2 rounded mt-1" />
-              <ErrorMessage name="linkedin" component="div" className="text-red-500 text-sm" />
-
-              <Field type="text" name="youtube" placeholder="YouTube URL" className="border p-2 rounded mt-1" />
-              <ErrorMessage name="youtube" component="div" className="text-red-500 text-sm" />
-
-              <label className="mt-2">Upload Cover Media:</label>
-              <input type="file" accept="image/*,video/*" className="border p-2 rounded mt-1"
-                onChange={(event) => setFieldValue("coverMedia", event.currentTarget.files[0])} />
-              <ErrorMessage name="coverMedia" component="div" className="text-red-500 text-sm" /> */}
-
-              <button type="submit" disabled={isSubmitting} className="mt-4 bg-blue-500 text-white py-2 rounded">
-                {isSubmitting ? "Signing up..." : "Sign Up"}
-              </button>
-            </Form>
-          )}
-        </Formik>
-
-        <p className="mt-4 text-center">
-          Already have an account? <Link to="/trainer/login" className="text-blue-500">Login</Link>
-        </p>
-      </div>
+        {/* Submit */}
+        <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded w-full hover:bg-blue-600">Register</button>
+      </form>
     </div>
   );
 };
