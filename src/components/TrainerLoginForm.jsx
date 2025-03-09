@@ -25,10 +25,10 @@ const TrainerLoginForm = () => {
             try {
               const response = await axios.post(
                 "https://fitnesshub-5yf3.onrender.com/api/trainer-auth/login",
-                values
+                values,
+                { withCredentials: true }
               );
-              localStorage.setItem("trainerToken", response.data.token);
-              navigate("/trainer/dashboard");
+              navigate("/trainer/TrainerDashboard");
             } catch (error) {
               setMessage(error.response?.data?.message || "Login failed");
             }

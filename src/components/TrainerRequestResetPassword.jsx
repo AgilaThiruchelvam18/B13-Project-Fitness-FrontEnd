@@ -26,7 +26,8 @@ const TrainerRequestResetPassword = () => {
             try {
               await axios.post(
                 "https://fitnesshub-5yf3.onrender.com/api/trainer-auth/request-password-reset",
-                values
+                values,
+                { withCredentials: true }
               );
               setMessage("Check your email for reset link.");
               setSubmitting(false); // Stop loading after success

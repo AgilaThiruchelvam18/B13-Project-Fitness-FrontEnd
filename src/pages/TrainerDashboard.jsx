@@ -1,16 +1,30 @@
-import { Link, useNavigate } from "react-router-dom";
-// import Login from "./Login";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Classes from "./Classes";
+import Schedule from "./Schedule";
+import Bookings from "./Bookings";
+import Earnings from "./Earnings";
+import Profile from "./Profile";
+import Sidebar from "../components/Sidebar";
+import TrainerProtectedRoute from "../components/ProtectedRoute";
 
-function TrainerDashboard(){
-  // const navigate = useNavigate();
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-100">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-       <div className="flex flex-row justify-between"><h2 className="text-2xl font-bold text-center mb-4">Dashboard</h2>
-          <Link to="/login">Back</Link></div>   
-          <p className="text-green-500 text-center">Welcome to the Trainer dashboard</p>
+function TrainerDashboard() {
+  return (
+    
+      <div className="flex">
+        <Sidebar />
+        <div className="flex-1 p-6">
+          <Routes>
+            <Route path="/classes" element={<TrainerProtectedRoute><Classes /></TrainerProtectedRoute>} />
+            <Route path="/schedule" element={<TrainerProtectedRoute><Schedule /></TrainerProtectedRoute>} />
+            <Route path="/bookings" element={<TrainerProtectedRoute><Bookings /></TrainerProtectedRoute>} />
+            <Route path="/earnings" element={<TrainerProtectedRoute><Earnings /></TrainerProtectedRoute>} />
+            <Route path="/profile" element={<TrainerProtectedRoute><Profile /></TrainerProtectedRoute>} />
+          </Routes>
         </div>
       </div>
-    );
+   
+  );
 }
+
 export default TrainerDashboard;

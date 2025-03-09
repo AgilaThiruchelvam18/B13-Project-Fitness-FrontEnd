@@ -8,6 +8,7 @@ const TrainerSignup = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
+  // ✅ Validation Schema
   const validationSchema = Yup.object({
     userName: Yup.string().required("Username is required"),
     email: Yup.string().email("Invalid email").required("Email is required"),
@@ -31,7 +32,7 @@ const TrainerSignup = () => {
   });
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-bold text-center mb-4">Trainer Sign Up</h2>
         {message && <p className="text-green-500 text-center">{message}</p>}
@@ -46,39 +47,54 @@ const TrainerSignup = () => {
             expertise: [],
             bio: "",
             certifications: [],
-            availability: [],
+            // availability: [],
             coverMedia: null,
-            socialLinks: {
-              facebook: "",
-              instagram: "",
-              twitter: "",
-              linkedin: "",
-              youtube: "",
-            },
+            // socialLinks: {
+            //   facebook: "",
+            //   instagram: "",
+            //   twitter: "",
+            //   linkedin: "",
+            //   youtube: "",
+            // },
           }}
           validationSchema={validationSchema}
           onSubmit={async (values, { setSubmitting }) => {
+            console.log("Submitting Form Values:", values);
+
             try {
               const formData = new FormData();
+
+              // ✅ Append data correctly
               Object.entries(values).forEach(([key, value]) => {
-                if (key === "coverMedia" && value) {
+                if (Array.isArray(value)) {
+                  value.forEach((item) => formData.append(key, item));
+                } else if (key === "coverMedia" && value) {
                   formData.append(key, value);
-                } else {
+                } else if (typeof value === "object") {
                   formData.append(key, JSON.stringify(value));
+                } else {
+                  formData.append(key, value);
                 }
               });
 
+              console.log("FormData before submission:", Object.fromEntries(formData.entries()));
+
+              // ✅ API Call
               const response = await axios.post(
-                "https://fitnesshub-5yf3.onrender.com/api/authtrainer/register",
-                formData
+                "https://fitnesshub-5yf3.onrender.com/api/trainer-auth/register",
+                formData,
+                { headers: { "Content-Type": "multipart/form-data" } }
               );
 
+              console.log("Response Data:", response.data);
               setMessage(response.data.message);
               setTimeout(() => navigate("/trainer/login"), 2000);
             } catch (error) {
+              console.error("Error Response:", error.response?.data || error.message);
               setMessage(error.response?.data?.message || "Registration failed");
+            } finally {
+              setSubmitting(false);
             }
-            setSubmitting(false);
           }}
         >
           {({ isSubmitting, setFieldValue }) => (
@@ -109,38 +125,18 @@ const TrainerSignup = () => {
               <Field as="textarea" name="bio" placeholder="Short Bio" className="border p-2 rounded mt-1" />
               <ErrorMessage name="bio" component="div" className="text-red-500 text-sm" />
 
-              <label className="mt-2">Certifications:</label>
-              <Field as="select" name="certifications" multiple className="border p-2 rounded mt-1">
-                {["Certified Personal Trainer", "Yoga Instructor", "Strength Coach"].map((cert) => (
-                  <option key={cert} value={cert}>{cert}</option>
-                ))}
-              </Field>
-              <ErrorMessage name="certifications" component="div" className="text-red-500 text-sm" />
-
-              <label className="mt-2">Availability:</label>
-              <Field as="select" name="availability" multiple className="border p-2 rounded mt-1">
-                {["Monday 08:00-09:00", "Tuesday 18:00-19:00", "Wednesday 10:00-11:00"].map((slot) => (
-                  <option key={slot} value={slot}>{slot}</option>
-                ))}
-              </Field>
-              <ErrorMessage name="availability" component="div" className="text-red-500 text-sm" />
-
-              <label className="mt-2">Cover Media (Image/Video):</label>
+              {/* <label className="mt-2">Cover Media (Image/Video):</label>
               <input
                 type="file"
                 accept="image/*, video/*"
                 onChange={(event) => setFieldValue("coverMedia", event.target.files[0])}
                 className="border p-2 rounded mt-1"
-              />
-
-              <h3 className="mt-2">Social Links:</h3>
-              <Field type="text" name="socialLinks.facebook" placeholder="Facebook URL" className="border p-2 rounded mt-1" />
-              <Field type="text" name="socialLinks.instagram" placeholder="Instagram URL" className="border p-2 rounded mt-1" />
-              <Field type="text" name="socialLinks.twitter" placeholder="Twitter URL" className="border p-2 rounded mt-1" />
-              <Field type="text" name="socialLinks.linkedin" placeholder="LinkedIn URL" className="border p-2 rounded mt-1" />
-              <Field type="text" name="socialLinks.youtube" placeholder="YouTube URL" className="border p-2 rounded mt-1" />
-
-              <button type="submit" disabled={isSubmitting} className="mt-4 bg-blue-500 text-white py-2 rounded">
+              /> */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`mt-4 py-2 rounded ${isSubmitting ? "bg-gray-400" : "bg-blue-500 text-white"}`}
+              >
                 {isSubmitting ? "Registering..." : "Sign Up"}
               </button>
             </Form>

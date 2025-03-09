@@ -28,7 +28,8 @@ const TrainerResetPassword = () => {
             try {
               const response = await axios.post(
                 `https://fitnesshub-5yf3.onrender.com/api/trainer-auth/reset-password/${token}`,
-                values
+                values,
+                { withCredentials: true }
               );
               setMessage(response.data.message);
               setTimeout(() => navigate("/trainer/login"), 2000);
