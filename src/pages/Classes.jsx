@@ -28,8 +28,16 @@ const Classes = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === "timeSlots") {
+      setFormData({ ...formData, timeSlots: e.target.value.split(",").map((slot) => {
+        const [day, time] = slot.trim().split(" ");
+        return { day, time };
+      })});
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
   };
+  
 
   const handleFileChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.files[0] });
