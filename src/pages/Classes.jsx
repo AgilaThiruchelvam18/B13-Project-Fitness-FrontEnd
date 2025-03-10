@@ -37,7 +37,7 @@ const Classes = () => {
     const form = new FormData();
     Object.keys(formData).forEach((key) => form.append(key, formData[key]));
 
-    await axios.post("https://fitnesshub-5yf3.onrender.com/api/classes",{ withCredentials: true });
+    await axios.post("https://fitnesshub-5yf3.onrender.com/api/classes",{ withCredentials: true, headers: { "Content-Type": "multipart/form-data" }  });
     fetchClasses();
   };
 
