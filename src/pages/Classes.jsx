@@ -3,7 +3,6 @@ import axios from "axios";
 
 const Classes = () => {
   const [classes, setClasses] = useState([]);
-  const [trainerId, setTrainerId] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     trainer: "",
@@ -26,26 +25,25 @@ const Classes = () => {
 
   useEffect(() => {
     fetchClasses();
+  }, []);
+  useEffect(() => {
+    const fetchTrainer = async () => {
+      try {
+        const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/trainers/", { 
+          withCredentials: true 
+        });
+        setFormData((prev) => ({ ...prev, trainer: res.data._id }));
+      } catch (err) {
+        console.error("Error fetching trainer info", err);
+      }
+    };
+  
     fetchTrainer();
   }, []);
-
-  const fetchTrainer = async () => {
-    try {
-      const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/trainers/me", {
-        withCredentials: true,
-      });
-      if (res.data && res.data._id) {
-        setTrainerId(res.data._id);
-      }
-    } catch (err) {
-      console.error("Error fetching trainer info", err);
-    }
-  };
-
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes", {
-        withCredentials: true,
+      const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes", { 
+        withCredentials: true 
       });
       setClasses(res.data);
     } catch (err) {
@@ -66,26 +64,55 @@ const Classes = () => {
     }));
   };
 
-  const handleCreateClass = async () => {
-    if (!trainerId) {
-      alert("Trainer ID is missing. Please wait or refresh the page.");
-      return;
-    }
+  const handleRecurrenceChange = (e) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      timeSlot: {
+        ...prev.timeSlot,
+        recurrence: value,
+        recurrenceDetails: {
+          daily: { startDate: "", endDate: "" },
+          weekly: [],
+        },
+      },
+    }));
+  };
 
+  const handleWeeklySelection = (day) => {
+    setFormData((prev) => {
+      const updatedWeekly = prev.timeSlot.recurrenceDetails.weekly.includes(day)
+        ? prev.timeSlot.recurrenceDetails.weekly.filter((d) => d !== day)
+        : [...prev.timeSlot.recurrenceDetails.weekly, day];
+
+      return {
+        ...prev,
+        timeSlot: {
+          ...prev.timeSlot,
+          recurrenceDetails: { ...prev.timeSlot.recurrenceDetails, weekly: updatedWeekly },
+        },
+      };
+    });
+  };
+
+  const handleCreateClass = async () => {
     try {
       const { date, time, ampm, recurrence, recurrenceDetails } = formData.timeSlot;
       const timeSlot = [{ date, time: `${time} ${ampm}`, recurrence, recurrenceDetails }];
-
-      const res = await axios.post(
-        "https://fitnesshub-5yf3.onrender.com/api/classes",
-        { ...formData, trainer: trainerId, timeSlots: timeSlot },
-        { withCredentials: true }
-      );
-
+      
+      if (recurrence === "daily" && (!recurrenceDetails.daily.startDate || !recurrenceDetails.daily.endDate)) {
+        alert("Please select start and end dates for daily recurrence.");
+        return;
+      }
+      
+      const res = await axios.post("https://fitnesshub-5yf3.onrender.com/api/classes", { ...formData, timeSlots: timeSlot }, { 
+        withCredentials: true 
+      });
+      
       setClasses([...classes, res.data]);
       setFormData({
         title: "",
-        trainer: trainerId,
+        trainer: formData.trainer,
         description: "",
         category: "",
         duration: "",
@@ -117,23 +144,9 @@ const Classes = () => {
         <input type="number" name="duration" placeholder="Duration (minutes)" value={formData.duration} onChange={handleChange} className="p-2 border rounded" />
         <input type="number" name="capacity" placeholder="Capacity" value={formData.capacity} onChange={handleChange} className="p-2 border rounded" />
         <input type="number" name="price" placeholder="Price ($)" value={formData.price} onChange={handleChange} className="p-2 border rounded" />
-        <input type="date" name="date" value={formData.timeSlot.date} onChange={handleTimeSlotChange} className="p-2 border rounded" />
-        <input type="time" name="time" value={formData.timeSlot.time} onChange={handleTimeSlotChange} className="p-2 border rounded" />
       </div>
-      <button onClick={handleCreateClass} className="mt-4 p-2 bg-blue-500 text-white rounded">Create Class</button>
-      <h3 className="text-lg font-semibold mt-6">Created Classes</h3>
-      <div className="mt-4 grid grid-cols-3 gap-4">
-        {classes.map((event) => (
-          <div key={event._id} className="p-4 border rounded shadow">
-            <h4 className="font-medium">{event.title}</h4>
-            <p className="text-sm text-gray-500">{event.description}</p>
-            <p><strong>Category:</strong> {event.category}</p>
-            <p><strong>Duration:</strong> {event.duration} min</p>
-            <p><strong>Capacity:</strong> {event.capacity}</p>
-            <p><strong>Price:</strong> ${event.price}</p>
-          </div>
-        ))}
-      </div>
+
+      <button onClick={handleCreateClass} className="mt-4 p-2 bg-blue-500 text-white rounded">Create Event</button>
     </div>
   );
 };
