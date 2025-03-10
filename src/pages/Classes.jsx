@@ -5,6 +5,7 @@ const Classes = () => {
   const [classes, setClasses] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
+    trainer: "",
     description: "",
     category: "",
     duration: "",
@@ -25,7 +26,20 @@ const Classes = () => {
   useEffect(() => {
     fetchClasses();
   }, []);
-
+  useEffect(() => {
+    const fetchTrainer = async () => {
+      try {
+        const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/trainers/me", { 
+          withCredentials: true 
+        });
+        setFormData((prev) => ({ ...prev, trainer: res.data._id }));
+      } catch (err) {
+        console.error("Error fetching trainer info", err);
+      }
+    };
+  
+    fetchTrainer();
+  }, []);
   const fetchClasses = async () => {
     try {
       const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes", { 
@@ -98,6 +112,7 @@ const Classes = () => {
       setClasses([...classes, res.data]);
       setFormData({
         title: "",
+        trainer:  "",
         description: "",
         category: "",
         duration: "",
