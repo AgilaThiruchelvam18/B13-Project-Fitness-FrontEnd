@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const Classes = () => {
-  const [timeSlots, setTimeSlots] = useState([]);
+  const [classes, setClasses] = useState([]); // Store created events
   const [formData, setFormData] = useState({
     title: "",
     trainer: "", // Should be set dynamically from logged-in trainer
@@ -21,6 +22,19 @@ const Classes = () => {
       },
     },
   });
+
+  useEffect(() => {
+    fetchClasses(); // Fetch created events on page load
+  }, []);
+
+  const fetchClasses = async () => {
+    try {
+      const res = await axios.get("/api/classes"); // API to fetch classes
+      setClasses(res.data);
+    } catch (err) {
+      console.error("Error fetching classes", err);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -69,21 +83,32 @@ const Classes = () => {
     });
   };
 
-  const handleAddTimeSlot = () => {
-    setTimeSlots([...timeSlots, formData.timeSlot]);
-    setFormData((prev) => ({
-      ...prev,
-      timeSlot: {
-        date: "",
-        time: "",
-        recurrence: "one-time",
-        recurrenceDetails: {
-          daily: { startDate: "", endDate: "" },
-          weekly: [],
-          monthly: { type: "daily", specificDay: "" },
+  const handleCreateClass = async () => {
+    try {
+      const res = await axios.post("/api/classes", formData); // API call to create event
+      setClasses([...classes, res.data]); // Add new event to list
+      setFormData({
+        title: "",
+        trainer: "",
+        description: "",
+        category: "",
+        duration: "",
+        capacity: "",
+        price: "",
+        timeSlot: {
+          date: "",
+          time: "",
+          recurrence: "one-time",
+          recurrenceDetails: {
+            daily: { startDate: "", endDate: "" },
+            weekly: [],
+            monthly: { type: "daily", specificDay: "" },
+          },
         },
-      },
-    }));
+      });
+    } catch (err) {
+      console.error("Error creating class", err);
+    }
   };
 
   return (
@@ -118,10 +143,10 @@ const Classes = () => {
 
         {/* Date Picker */}
         <input type="date" name="date" value={formData.timeSlot.date} onChange={handleTimeSlotChange} className="p-2 border rounded" />
-        
+
         {/* Time Picker */}
         <input type="time" name="time" value={formData.timeSlot.time} onChange={handleTimeSlotChange} className="p-2 border rounded" />
-        
+
         {/* Recurrence Selection */}
         <select name="recurrence" value={formData.timeSlot.recurrence} onChange={handleRecurrenceChange} className="p-2 border rounded">
           <option value="one-time">One-time</option>
@@ -131,14 +156,7 @@ const Classes = () => {
         </select>
       </div>
 
-      {/* Recurrence Details */}
-      {formData.timeSlot.recurrence === "daily" && (
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <input type="date" name="startDate" value={formData.timeSlot.recurrenceDetails.daily.startDate} onChange={(e) => setFormData((prev) => ({ ...prev, timeSlot: { ...prev.timeSlot, recurrenceDetails: { ...prev.timeSlot.recurrenceDetails, daily: { ...prev.timeSlot.recurrenceDetails.daily, startDate: e.target.value } } } }))} className="p-2 border rounded" />
-          <input type="date" name="endDate" value={formData.timeSlot.recurrenceDetails.daily.endDate} onChange={(e) => setFormData((prev) => ({ ...prev, timeSlot: { ...prev.timeSlot, recurrenceDetails: { ...prev.timeSlot.recurrenceDetails, daily: { ...prev.timeSlot.recurrenceDetails.daily, endDate: e.target.value } } } }))} className="p-2 border rounded" />
-        </div>
-      )}
-
+      {/* Weekly Selection */}
       {formData.timeSlot.recurrence === "weekly" && (
         <div className="mt-4">
           <label className="block font-medium">Select Days</label>
@@ -151,20 +169,26 @@ const Classes = () => {
         </div>
       )}
 
-      {formData.timeSlot.recurrence === "monthly" && (
-        <div className="mt-4">
-          <select value={formData.timeSlot.recurrenceDetails.monthly.type} onChange={(e) => setFormData((prev) => ({ ...prev, timeSlot: { ...prev.timeSlot, recurrenceDetails: { ...prev.timeSlot.recurrenceDetails, monthly: { ...prev.timeSlot.recurrenceDetails.monthly, type: e.target.value } } } }))} className="p-2 border rounded">
-            <option value="daily">Daily</option>
-            <option value="alternate">Alternate Days</option>
-            <option value="specific">Specific Day</option>
-          </select>
-          {formData.timeSlot.recurrenceDetails.monthly.type === "specific" && (
-            <input type="number" min="1" max="31" value={formData.timeSlot.recurrenceDetails.monthly.specificDay} onChange={(e) => setFormData((prev) => ({ ...prev, timeSlot: { ...prev.timeSlot, recurrenceDetails: { ...prev.timeSlot.recurrenceDetails, monthly: { ...prev.timeSlot.recurrenceDetails.monthly, specificDay: e.target.value } } } }))} className="p-2 border rounded mt-2" placeholder="Enter Date (1-31)" />
-          )}
-        </div>
-      )}
+      {/* Create Event Button */}
+      <button onClick={handleCreateClass} className="mt-4 p-2 bg-blue-500 text-white rounded">Create Event</button>
 
-      <button onClick={handleAddTimeSlot} className="mt-4 p-2 bg-blue-500 text-white rounded">Add Time Slot</button>
+      {/* Display Created Classes */}
+      <h3 className="text-lg font-semibold mt-6">Created Events</h3>
+      <div className="mt-4 grid grid-cols-3 gap-4">
+        {classes.map((event) => (
+          <div key={event._id} className="p-4 border rounded shadow">
+            <h4 className="font-medium">{event.title}</h4>
+            <p className="text-sm text-gray-500">{event.description}</p>
+            <p><strong>Category:</strong> {event.category}</p>
+            <p><strong>Duration:</strong> {event.duration} min</p>
+            <p><strong>Capacity:</strong> {event.capacity}</p>
+            <p><strong>Price:</strong> ${event.price}</p>
+            <p><strong>Date:</strong> {event.timeSlots[0]?.date || "N/A"}</p>
+            <p><strong>Time:</strong> {event.timeSlots[0]?.time || "N/A"}</p>
+            <p><strong>Recurrence:</strong> {event.timeSlots[0]?.recurrence}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
