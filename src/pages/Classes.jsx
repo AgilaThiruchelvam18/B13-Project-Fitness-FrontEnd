@@ -70,7 +70,7 @@ const Classes = () => {
           <option value="Nutrition">Nutrition</option>
         </select>
         <input type="number" name="duration" placeholder="Duration (minutes)" onChange={handleChange} required className="p-2 border rounded" />
-        <input type="text" name="timeSlots" placeholder="Time Slots (e.g., Mon 10 AM, Wed 6 PM)" onChange={handleChange} className="p-2 border rounded" />
+        {/* <input type="text" name="timeSlots" placeholder="Time Slots (e.g., Mon 10 AM, Wed 6 PM)" onChange={handleChange} className="p-2 border rounded" /> */}
         <input type="number" name="price" placeholder="Price ($)" onChange={handleChange} required className="p-2 border rounded" />
         <input type="file" name="image" onChange={handleFileChange} className="p-2 border rounded" />
         <input type="file" name="video" onChange={handleFileChange} className="p-2 border rounded" />
