@@ -144,8 +144,26 @@ const Classes = () => {
         <input type="number" name="duration" placeholder="Duration (minutes)" value={formData.duration} onChange={handleChange} className="p-2 border rounded" />
         <input type="number" name="capacity" placeholder="Capacity" value={formData.capacity} onChange={handleChange} className="p-2 border rounded" />
         <input type="number" name="price" placeholder="Price ($)" value={formData.price} onChange={handleChange} className="p-2 border rounded" />
+        <input type="date" name="date" value={formData.timeSlot.date} onChange={handleTimeSlotChange} className="p-2 border rounded" />
+        <input type="time" name="time" value={formData.timeSlot.time} onChange={handleTimeSlotChange} className="p-2 border rounded" />
+        <select name="ampm" value={formData.timeSlot.ampm} onChange={handleTimeSlotChange} className="p-2 border rounded">
+          <option value="AM">AM</option>
+          <option value="PM">PM</option>
+        </select>
+        <select name="recurrence" value={formData.timeSlot.recurrence} onChange={handleRecurrenceChange} className="p-2 border rounded">
+          <option value="one-time">One-time</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+        </select>
+        {formData.timeSlot.recurrence === "daily" && (
+          <>
+            <label>Start Date:</label>
+            <input type="date" name="startDate" value={formData.timeSlot.recurrenceDetails.daily.startDate} onChange={handleTimeSlotChange} className="p-2 border rounded" />
+            <label>End Date:</label>
+            <input type="date" name="endDate" value={formData.timeSlot.recurrenceDetails.daily.endDate} onChange={handleTimeSlotChange} className="p-2 border rounded" />
+          </>
+        )}
       </div>
-
       <button onClick={handleCreateClass} className="mt-4 p-2 bg-blue-500 text-white rounded">Create Event</button>
     </div>
   );
