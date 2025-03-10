@@ -2,53 +2,49 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 const Classes = () => {
-  // const [classes, setClasses] = useState([]);
-  // const [formData, setFormData] = useState({
-  //   title: "",
-  //   description: "",
-  //   type: "Yoga",
-  //   duration:60,
-  //   timeSlots: "",
-  //   price: "",
-  //   availability: true,
-  //   image: null,
-  //   video: null
-  // });
+  const [classes, setClasses] = useState([]);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    type: "Yoga",
+    duration:60,
+    timeSlots: "",
+    price: "",
+    availability: true,
+    image: null,
+    video: null
+  });
 
-  // useEffect(() => {
-  //   fetchClasses();
-  // }, []);
+  useEffect(() => {
+    fetchClasses();
+  }, []);
 
-  // const fetchClasses = async () => {
-  //   const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes",{ withCredentials: true });
-  //   setClasses(res.data);
-  // };
+  const fetchClasses = async () => {
+    const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes",{ withCredentials: true });
+    setClasses(res.data);
+  };
 
-  // const handleChange = (e) => {
-  //   setFormData({ ...formData, [e.target.name]: e.target.value });
-  // };
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  // const handleFileChange = (e) => {
-  //   setFormData({ ...formData, [e.target.name]: e.target.files[0] });
-  // };
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.files[0] });
+  };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   const form = new FormData();
-  //   Object.keys(formData).forEach((key) => form.append(key, formData[key]));
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const form = new FormData();
+    Object.keys(formData).forEach((key) => form.append(key, formData[key]));
 
-  //   await axios.post("https://fitnesshub-5yf3.onrender.com/api/classes",{ withCredentials: true });
-  //   fetchClasses();
-  // };
+    await axios.post("https://fitnesshub-5yf3.onrender.com/api/classes",{ withCredentials: true });
+    fetchClasses();
+  };
 
   return (
-    <div className="p-6 bg-amber-600">
+    <div className="p-6">
       <h2 className="text-2xl font-semibold mb-4 text-black">Manage Classes</h2>
-<p className=" text-red">Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit neque quo cumque quis consectetur suscipit
-   fuga officiis ad vitae provident totam blanditiis natus quidem, vel exercitationem, soluta architecto dignissimos 
-   adipisci alias non eaque reiciendis porro? Nobis ad earum deleniti, voluptate excepturi omnis blanditiis maxime 
-   quaerat recusandae incidunt est dignissimos placeat!</p>
-      {/* <form onSubmit={handleSubmit} className="grid gap-4">
+      <form onSubmit={handleSubmit} className="grid gap-4">
         <input type="text" name="title" placeholder="Class Title" onChange={handleChange} required className="p-2 border rounded" />
         <textarea name="description" placeholder="Description" onChange={handleChange} className="p-2 border rounded"></textarea>
         <select name="type" onChange={handleChange} className="p-2 border rounded">
@@ -80,7 +76,7 @@ const Classes = () => {
             </li>
           ))}
         </ul>
-      </div> */}
+      </div>
     </div>
   );
 };
