@@ -15,11 +15,11 @@ function TrainerDashboard() {
         <Sidebar />
         <div className="flex-1 p-6">
           <Routes>
-            <Route path="/classes" element={<TrainerProtectedRoute><Classes /></TrainerProtectedRoute>} />
-            <Route path="/schedule" element={<TrainerProtectedRoute><Schedule /></TrainerProtectedRoute>} />
-            <Route path="/bookings" element={<TrainerProtectedRoute><Bookings /></TrainerProtectedRoute>} />
-            <Route path="/earnings" element={<TrainerProtectedRoute><Earnings /></TrainerProtectedRoute>} />
-            <Route path="/profile" element={<TrainerProtectedRoute><Profile /></TrainerProtectedRoute>} />
+            <Route path="classes" element={<TrainerProtectedRoute><Classes /></TrainerProtectedRoute>} />
+            <Route path="schedule" element={<TrainerProtectedRoute><Schedule /></TrainerProtectedRoute>} />
+            <Route path="bookings" element={<TrainerProtectedRoute><Bookings /></TrainerProtectedRoute>} />
+            <Route path="earnings" element={<TrainerProtectedRoute><Earnings /></TrainerProtectedRoute>} />
+            <Route path="profile" element={<TrainerProtectedRoute><Profile /></TrainerProtectedRoute>} />
           </Routes>
         </div>
       </div>

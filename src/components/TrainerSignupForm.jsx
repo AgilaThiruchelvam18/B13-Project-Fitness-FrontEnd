@@ -82,8 +82,8 @@ const TrainerSignup = () => {
               // ✅ API Call
               const response = await axios.post(
                 "https://fitnesshub-5yf3.onrender.com/api/trainer-auth/register",
-                formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
+                formData,  
+                { withCredentials: true,headers: { "Content-Type": "multipart/form-data" } }
               );
 
               console.log("Response Data:", response.data);

@@ -27,7 +27,7 @@ const CustomerDashboard = () => {
         <DashPage>
           <Routes>
             <Route path="myfitness" element={<MyFitness />} />
-            <Route path="/myfitness/trainerslist/:category" element={<TrainersList />} />   
+            <Route path="myfitness/trainerslist/:category" element={<TrainersList />} />   
            <Route path="mybookings" element={<MyBookings />} />
            <Route path="TrainerDetails" element={<TrainerDetails />} />
             <Route path="bookinghistory" element={<BookingHistory />} />

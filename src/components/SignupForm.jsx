@@ -155,7 +155,8 @@ const SignupForm = () => {
           onSubmit={async (values, { setSubmitting }) => {
             try {
               const response = await axios.post("https://fitnesshub-5yf3.onrender.com/api/user-auth/register",
-                values
+                values,
+                { withCredentials: true}
               );
               setMessage(response.data.message);
               setTimeout(() => navigate("/customer/login"), 2000);

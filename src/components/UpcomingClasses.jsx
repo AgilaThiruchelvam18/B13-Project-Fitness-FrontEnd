@@ -11,15 +11,19 @@ const UpcomingClasses = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [bookingStatus, setBookingStatus] = useState(null); // ✅ Track booking status messages
-
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const response = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes", {
-          withCredentials: true, // ✅ Ensures cookies are sent
-        });
+        console.log("Checking cookies before request:", document.cookie); // Debugging
+  
+        const response = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes/upcomingclasses", 
+          { withCredentials: true } // ✅ Ensures cookies are sent
+        );
+  
         setClasses(response.data);
+        console.log("response.data", response.data);
       } catch (err) {
+        console.error("Error fetching classes:", err.response?.data || err.message);
         setError("Failed to fetch classes. Please try again.");
       } finally {
         setLoading(false);
@@ -27,12 +31,14 @@ const UpcomingClasses = () => {
     };
     fetchClasses();
   }, []);
+  
 
   // ✅ Filter classes based on category selection
   const filteredClasses =
     selectedCategory === "All"
       ? classes
       : classes.filter((cls) => cls.category.toLowerCase() === selectedCategory.toLowerCase());
+console.log("filteredClasses",filteredClasses);
 
   // ✅ Handle booking action
   const handleBookNow = async (classId) => {

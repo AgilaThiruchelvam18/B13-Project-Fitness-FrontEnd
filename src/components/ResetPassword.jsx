@@ -28,7 +28,9 @@ const ResetPassword = () => {
             try {
               const response = await axios.post(
                 `https://fitnesshub-5yf3.onrender.com/api/user-auth/reset-password/${token}`,
-                values
+                values,
+                { withCredentials: true}
+
               );
               setMessage(response.data.message);
               setTimeout(() => navigate("/customer/login"), 2000);

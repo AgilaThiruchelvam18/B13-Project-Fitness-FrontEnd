@@ -52,7 +52,7 @@ const TrainersList = () => {
     const fetchTrainers = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("https://fitnesshub-5yf3.onrender.com/api/trainers");
+        const response = await axios.get("https://fitnesshub-5yf3.onrender.com/api/trainers", { withCredentials: true });
         setTrainers(response.data);
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch trainers");

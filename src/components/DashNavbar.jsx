@@ -7,9 +7,9 @@ const DashNavbar = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const {data} = await axios.get("https://fitnesshub-5yf3.onrender.com/api/customer/dashboard", { withCredentials: true });
-        console.log("data===>",data);
-        setUsername(Agila);
+        // const {data} = await axios.get("https://fitnesshub-5yf3.onrender.com/api/customer/dashboard", { withCredentials: true });
+        // console.log("data===>",data);
+        // setUsername(Agila);
       } catch (error) {
         console.error("Error fetching user", error);
       }
