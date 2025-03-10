@@ -164,6 +164,23 @@ const Classes = () => {
       )}
 
       <button onClick={handleCreateClass} className="mt-4 p-2 bg-blue-500 text-white rounded">Create Event</button>
+
+      <h3 className="text-lg font-semibold mt-6">Created Events</h3>
+      <div className="mt-4 grid grid-cols-3 gap-4">
+        {classes.map((event) => (
+          <div key={event._id} className="p-4 border rounded shadow">
+            <h4 className="font-medium">{event.title}</h4>
+            <p className="text-sm text-gray-500">{event.description}</p>
+            <p><strong>Category:</strong> {event.category}</p>
+            <p><strong>Duration:</strong> {event.duration} min</p>
+            <p><strong>Capacity:</strong> {event.capacity}</p>
+            <p><strong>Price:</strong> ${event.price}</p>
+            <p><strong>Date:</strong> {event.timeSlots?.[0]?.date || "N/A"}</p>
+            <p><strong>Time:</strong> {event.timeSlots?.[0]?.time || "N/A"}</p>
+            <p><strong>Recurrence:</strong> {event.timeSlots?.[0]?.recurrence}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
