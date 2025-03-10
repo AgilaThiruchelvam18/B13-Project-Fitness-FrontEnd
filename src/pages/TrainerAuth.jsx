@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // ✅ Correct import
-import TrainerProtectedRoute from "../components/ProtectedRoute";
+import TrainerProtectedRoute from "../components/TrainerProtectedRoute";
 import TrainerLoginForm from '../components/TrainerLoginForm';
 import TrainerSignupForm from '../components/TrainerSignupForm';
 import TrainerRequestResetPassword from "../components/TrainerRequestResetPassword.jsx";

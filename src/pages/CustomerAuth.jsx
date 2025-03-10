@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // ✅ Correct import
-import ProtectedRoute from "../components/ProtectedRoute";
+import CustomerProtectedRoute from "../components/ProtectedRoute";
 import LoginForm from '../components/LoginForm';
 import SignupForm from '../components/SignupForm';
 import RequestResetPassword from "../components/RequestResetPassword.jsx";
@@ -14,7 +14,7 @@ function CustomerAuth() {
         <Route path="login" element={<LoginForm />} />
         <Route path="forgot-password" element={<RequestResetPassword />} />
         <Route path="reset-password/:token" element={<ResetPassword />} />
-        <Route path="CustomerDashboard/*" element={<ProtectedRoute />}>
+        <Route path="CustomerDashboard/*" element={<CustomerProtectedRoute />}>
     <Route path="*" element={<CustomerDashboard />} />
   </Route>
       </Routes>
