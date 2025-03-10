@@ -29,7 +29,9 @@ const Classes = () => {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("/api/classes");
+      const res =await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes", { 
+        withCredentials: true // ✅ Ensures cookies are sent for authentication
+      });
       setClasses(res.data);
     } catch (err) {
       console.error("Error fetching classes", err);
@@ -83,7 +85,9 @@ const Classes = () => {
 
   const handleCreateClass = async () => {
     try {
-      const res = await axios.post("/api/classes", formData);
+      const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes", formData ,{ 
+        withCredentials: true // ✅ Ensures cookies are sent for authentication
+      });
       setClasses([...classes, res.data]);
       setFormData({
         title: "",
