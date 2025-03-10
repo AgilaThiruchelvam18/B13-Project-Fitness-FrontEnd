@@ -3,14 +3,23 @@ import axios from "axios";
 
 const Classes = () => {
   const [classes, setClasses] = useState([]);
+  const [timeSlots, setTimeSlots] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     category: "Yoga",
     duration: 60,
-    timeSlots: "",
+    timeSlots: [],
     capacity: "",
     price: "",
+  });
+  const [slotData, setSlotData] = useState({
+    date: "",
+    day: "",
+    amPm: "AM",
+    month: "",
+    weekStart: "",
+    weekEnd: "",
   });
 
   useEffect(() => {
@@ -20,23 +29,25 @@ const Classes = () => {
   const fetchClasses = async () => {
     const res = await axios.get(
       "https://fitnesshub-5yf3.onrender.com/api/classes",
-      { withCredentials: true } // ✅ Ensures JWT is sent with request
+      { withCredentials: true }
     );
     setClasses(res.data);
   };
 
   const handleChange = (e) => {
-    if (e.target.name === "timeSlots") {
-      setFormData({
-        ...formData,
-        timeSlots: e.target.value.split(",").map((slot) => {
-          const [day, time] = slot.trim().split(" ");
-          return { day, time };
-        }),
-      });
-    } else {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
-    }
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSlotChange = (e) => {
+    const { name, value } = e.target;
+    setSlotData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const addTimeSlot = () => {
+    setTimeSlots([...timeSlots, slotData]);
+    setFormData({ ...formData, timeSlots: [...timeSlots, slotData] });
+    setSlotData({ date: "", day: "", amPm: "AM", month: "", weekStart: "", weekEnd: "" });
   };
 
   const handleSubmit = async (e) => {
@@ -44,7 +55,7 @@ const Classes = () => {
     await axios.post(
       "https://fitnesshub-5yf3.onrender.com/api/classes",
       formData,
-      { withCredentials: true } // ✅ Ensures JWT is sent with request
+      { withCredentials: true }
     );
     fetchClasses();
   };
@@ -64,11 +75,35 @@ const Classes = () => {
           <option value="Nutrition">Nutrition</option>
         </select>
         <input type="number" name="duration" placeholder="Duration (minutes)" onChange={handleChange} required className="p-2 border rounded" />
-        <input type="text" name="timeSlots" placeholder="Time Slots (e.g., Mon 10 AM, Wed 6 PM)" onChange={handleChange} className="p-2 border rounded" />
         <input type="number" name="capacity" placeholder="Capacity" onChange={handleChange} required className="p-2 border rounded" />
         <input type="number" name="price" placeholder="Price ($)" onChange={handleChange} required className="p-2 border rounded" />
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded">Create Class</button>
       </form>
+
+      <h3 className="text-xl font-semibold mt-6">Add Time Slots</h3>
+      <div className="grid grid-cols-2 gap-4 mt-2">
+        <input type="text" name="date" placeholder="Date" value={slotData.date} onChange={handleSlotChange} className="p-2 border rounded" />
+        <input type="text" name="day" placeholder="Day" value={slotData.day} onChange={handleSlotChange} className="p-2 border rounded" />
+        <select name="amPm" value={slotData.amPm} onChange={handleSlotChange} className="p-2 border rounded">
+          <option value="AM">AM</option>
+          <option value="PM">PM</option>
+        </select>
+        <input type="text" name="month" placeholder="Month" value={slotData.month} onChange={handleSlotChange} className="p-2 border rounded" />
+        <input type="text" name="weekStart" placeholder="Week Start Date" value={slotData.weekStart} onChange={handleSlotChange} className="p-2 border rounded" />
+        <input type="text" name="weekEnd" placeholder="Week End Date" value={slotData.weekEnd} onChange={handleSlotChange} className="p-2 border rounded" />
+      </div>
+      <button onClick={addTimeSlot} className="mt-4 p-2 bg-blue-500 text-white rounded">Add Time Slot</button>
+
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold">Selected Time Slots:</h3>
+        <div className="grid grid-cols-3 gap-4 mt-2">
+          {timeSlots.map((slot, index) => (
+            <div key={index} className="p-3 border rounded shadow">
+              <p>{slot.date}, {slot.day}, {slot.amPm}</p>
+              <p>{slot.month} - {slot.weekStart} to {slot.weekEnd}</p>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <div className="mt-6">
         <h3 className="text-xl font-semibold mb-2">Your Classes</h3>
