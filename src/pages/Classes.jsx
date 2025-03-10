@@ -29,12 +29,15 @@ const Classes = () => {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("/api/classes"); // API to fetch classes
-      setClasses(res.data);
+      const res = await axios.get("/api/classes"); 
+      console.log("Fetched Classes:", res.data); // Debugging: Check API response
+      setClasses(Array.isArray(res.data) ? res.data : []); // Ensure it's an array
     } catch (err) {
       console.error("Error fetching classes", err);
+      setClasses([]); // Set empty array on error
     }
   };
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
