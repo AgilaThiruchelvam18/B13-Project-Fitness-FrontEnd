@@ -20,7 +20,10 @@ const Classes = () => {
   }, []);
 
   const fetchClasses = async () => {
-    const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes",{ withCredentials: true });
+    const res = await axios.get(
+      "https://fitnesshub-5yf3.onrender.com/api/classes",
+      { withCredentials: true } // ✅ Ensures JWT is sent with request
+    );
     setClasses(res.data);
   };
 
@@ -37,8 +40,11 @@ const Classes = () => {
     const form = new FormData();
     Object.keys(formData).forEach((key) => form.append(key, formData[key]));
 
-    await axios.post("https://fitnesshub-5yf3.onrender.com/api/classes",{ withCredentials: true, headers: { "Content-Type": "multipart/form-data" }  });
-    fetchClasses();
+    await axios.post(
+      "https://fitnesshub-5yf3.onrender.com/api/classes",
+      form,
+      { withCredentials: true } // ✅ Ensures JWT is sent with request
+    );    fetchClasses();
   };
 
   return (
