@@ -5,7 +5,6 @@ const Classes = () => {
   const [classes, setClasses] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
-    trainer: localStorage.getItem("trainerId") || "",
     description: "",
     category: "",
     duration: "",
@@ -99,7 +98,6 @@ const Classes = () => {
       setClasses([...classes, res.data]);
       setFormData({
         title: "",
-        trainer: localStorage.getItem("trainerId") || "",
         description: "",
         category: "",
         duration: "",
