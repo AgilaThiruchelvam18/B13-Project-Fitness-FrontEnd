@@ -29,9 +29,8 @@ const Classes = () => {
   useEffect(() => {
     const fetchTrainer = async () => {
       try {
-        const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/trainers/profile", { 
-          withCredentials: true 
-        });
+        const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/trainers/profile", { withCredentials: true });
+
         
         setFormData((prev) => ({ ...prev, trainer: res.data._id }));
       } catch (err) {
