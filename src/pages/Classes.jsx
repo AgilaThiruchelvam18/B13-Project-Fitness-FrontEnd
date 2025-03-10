@@ -85,7 +85,7 @@ const Classes = () => {
 
   const handleCreateClass = async () => {
     try {
-      const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes", formData ,{ 
+      const res = await axios.post("https://fitnesshub-5yf3.onrender.com/api/classes", formData ,{ 
         withCredentials: true // ✅ Ensures cookies are sent for authentication
       });
       setClasses([...classes, res.data]);
