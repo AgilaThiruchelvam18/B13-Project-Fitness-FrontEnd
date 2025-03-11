@@ -171,8 +171,9 @@ const Classes = () => {
           </>
         )}
          {formData.timeSlot.recurrence === "weekly" && (
-        <div className="mt-4">
+        <div className=" flex flex-col mt-4">
           <label>Select Days:</label>
+
           {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
             <label key={day} className="mr-2">
               <input type="checkbox" value={day} checked={formData.timeSlot.recurrenceDetails.weekly.includes(day)} onChange={() => handleWeeklySelection(day)} />
