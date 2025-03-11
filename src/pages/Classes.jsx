@@ -141,7 +141,7 @@ const Classes = () => {
         <input type="text" name="title" placeholder="Class Title" value={formData.title} onChange={handleChange} className="p-2 border rounded" />
         <input type="text" name="description" placeholder="Class Description" value={formData.description} onChange={handleChange} className="p-2 border rounded" />
         <select name="category" placeholder="Category" value={formData.category} onChange={handleChange} className="p-2 border rounded" >
-        <option value="Yoga">Yoga</option>
+        <option value="Yoga" selected>Yoga</option>
           <option value="Strength Training">Strength Training</option>
           <option value="Cardio">Cardio</option>
           <option value="Meditation">Meditation</option>
@@ -153,10 +153,7 @@ const Classes = () => {
         <input type="number" name="price" placeholder="Price ($)" value={formData.price} onChange={handleChange} className="p-2 border rounded" />
         <input type="date" name="date" value={formData.timeSlot.date} onChange={handleTimeSlotChange} className="p-2 border rounded" />
         <input type="time" name="time" value={formData.timeSlot.time} onChange={handleTimeSlotChange} className="p-2 border rounded" />
-        <select name="ampm" value={formData.timeSlot.ampm} onChange={handleTimeSlotChange} className="p-2 border rounded">
-          <option value="AM">AM</option>
-          <option value="PM">PM</option>
-        </select>
+        
         <select name="recurrence" value={formData.timeSlot.recurrence} onChange={handleRecurrenceChange} className="p-2 border rounded">
           <option value="one-time">One-time</option>
           <option value="daily">Daily</option>
@@ -184,6 +181,22 @@ const Classes = () => {
       )}
       </div>
       <button onClick={handleCreateClass} className="mt-4 p-2 bg-blue-500 text-white rounded">Create Event</button>
+      <h3 className="text-lg font-semibold mt-6">Created Events</h3>
+      <div className="mt-4 grid grid-cols-3 gap-4">
+        {classes.map((event) => (
+          <div key={event._id} className="p-4 border rounded shadow">
+            <h4 className="font-medium">{event.title}</h4>
+            <p className="text-sm text-gray-500">{event.description}</p>
+            <p><strong>Category:</strong> {event.category}</p>
+            <p><strong>Duration:</strong> {event.duration} min</p>
+            <p><strong>Capacity:</strong> {event.capacity}</p>
+            <p><strong>Price:</strong> ${event.price}</p>
+            <p><strong>Date:</strong> {event.timeSlots?.[0]?.date || "N/A"}</p>
+            <p><strong>Time:</strong> {event.timeSlots?.[0]?.time || "N/A"}</p>
+            <p><strong>Recurrence:</strong> {event.timeSlots?.[0]?.recurrence}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
