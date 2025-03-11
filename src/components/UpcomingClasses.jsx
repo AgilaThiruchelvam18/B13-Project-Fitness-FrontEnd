@@ -44,7 +44,7 @@ const UpcomingClasses = () => {
 
   // ✅ Handle booking action
   const handleBookNow = async (cls) => {
-    if (!cls || !cls._id || !cls.trainer || !cls.category || !cls.price) {
+    if (!cls || !cls._id || !cls.trainer || !cls.category ||cls.trainer._id || !cls.price) {
       setBookingStatus({ message: "❌ Missing class details. Unable to book.", type: "error" });
       console.error("❌ Booking failed: Missing class details", cls);
       return;
@@ -53,7 +53,7 @@ const UpcomingClasses = () => {
     try {
       const bookingData = {
         classId: cls._id,
-        trainerId: cls.trainer._id, // Ensure trainerId is sent
+        trainerId: cls.trainer, // Ensure trainerId is sent
         category: cls.category,
         price: cls.price, // Ensure price is present
       };
