@@ -40,6 +40,7 @@ const UpcomingClasses = () => {
       setBookingStatus({ message: "❌ Missing class details. Unable to book.", type: "error" });
       return;
     }
+    console.log("Trainer ID Sent:", cls.trainer);
 
     try {
       const bookingData = {
