@@ -140,7 +140,14 @@ const Classes = () => {
       <div className="grid grid-cols-2 gap-4">
         <input type="text" name="title" placeholder="Class Title" value={formData.title} onChange={handleChange} className="p-2 border rounded" />
         <input type="text" name="description" placeholder="Class Description" value={formData.description} onChange={handleChange} className="p-2 border rounded" />
-        <input type="text" name="category" placeholder="Category" value={formData.category} onChange={handleChange} className="p-2 border rounded" />
+        <select name="category" placeholder="Category" value={formData.category} onChange={handleChange} className="p-2 border rounded" >
+        <option value="Yoga">Yoga</option>
+          <option value="Strength Training">Strength Training</option>
+          <option value="Cardio">Cardio</option>
+          <option value="Meditation">Meditation</option>
+          <option value="Zumba">Zumba</option>
+          <option value="Nutrition">Nutrition</option>
+        </select>
         <input type="number" name="duration" placeholder="Duration (minutes)" value={formData.duration} onChange={handleChange} className="p-2 border rounded" />
         <input type="number" name="capacity" placeholder="Capacity" value={formData.capacity} onChange={handleChange} className="p-2 border rounded" />
         <input type="number" name="price" placeholder="Price ($)" value={formData.price} onChange={handleChange} className="p-2 border rounded" />
@@ -163,6 +170,17 @@ const Classes = () => {
             <input type="date" name="endDate" value={formData.timeSlot.recurrenceDetails.daily.endDate} onChange={handleTimeSlotChange} className="p-2 border rounded" />
           </>
         )}
+         {formData.timeSlot.recurrence === "weekly" && (
+        <div className="mt-4">
+          <label>Select Days:</label>
+          {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+            <label key={day} className="mr-2">
+              <input type="checkbox" value={day} checked={formData.timeSlot.recurrenceDetails.weekly.includes(day)} onChange={() => handleWeeklySelection(day)} />
+              {day}
+            </label>
+          ))}
+        </div>
+      )}
       </div>
       <button onClick={handleCreateClass} className="mt-4 p-2 bg-blue-500 text-white rounded">Create Event</button>
     </div>
