@@ -11,19 +11,21 @@ const UpcomingClasses = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [bookingStatus, setBookingStatus] = useState(null); // ✅ Track booking status messages
+
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        console.log("Checking cookies before request:", document.cookie); // Debugging
-  
-        const response = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes/upcomingclasses", 
+        console.log("🔹 Checking cookies before request:", document.cookie); // Debugging
+
+        const response = await axios.get(
+          "https://fitnesshub-5yf3.onrender.com/api/classes/upcomingclasses",
           { withCredentials: true } // ✅ Ensures cookies are sent
         );
-  
+
         setClasses(response.data);
-        console.log("response.data", response.data);
+        console.log("✅ Classes Fetched:", response.data);
       } catch (err) {
-        console.error("Error fetching classes:", err.response?.data || err.message);
+        console.error("❌ Error fetching classes:", err.response?.data || err.message);
         setError("Failed to fetch classes. Please try again.");
       } finally {
         setLoading(false);
@@ -31,26 +33,42 @@ const UpcomingClasses = () => {
     };
     fetchClasses();
   }, []);
-  
 
   // ✅ Filter classes based on category selection
   const filteredClasses =
     selectedCategory === "All"
       ? classes
       : classes.filter((cls) => cls.category.toLowerCase() === selectedCategory.toLowerCase());
-console.log("filteredClasses",filteredClasses);
+
+  console.log("🎯 Filtered Classes:", filteredClasses);
 
   // ✅ Handle booking action
-  const handleBookNow = async (classId) => {
+  const handleBookNow = async (cls) => {
+    if (!cls || !cls._id || !cls.trainer || !cls.category || !cls.price) {
+      setBookingStatus({ message: "❌ Missing class details. Unable to book.", type: "error" });
+      console.error("❌ Booking failed: Missing class details", cls);
+      return;
+    }
+
     try {
+      const bookingData = {
+        classId: cls._id,
+        trainerId: cls.trainer._id, // Ensure trainerId is sent
+        category: cls.category,
+        price: cls.price, // Ensure price is present
+      };
+
+      console.log("🔹 Sending Booking Data:", bookingData); // Debugging
+
       const response = await axios.post(
         "https://fitnesshub-5yf3.onrender.com/api/bookings",
-        { classId },
-        { withCredentials: true } // ✅ Send cookies for authentication
+        bookingData,
+        { withCredentials: true }
       );
 
       setBookingStatus({ message: response.data.message, type: "success" });
     } catch (err) {
+      console.error("❌ Booking failed:", err.response?.data || err.message);
       setBookingStatus({ message: err.response?.data?.message || "Booking failed!", type: "error" });
     }
   };
@@ -61,7 +79,11 @@ console.log("filteredClasses",filteredClasses);
 
       {/* ✅ Display Booking Status Messages */}
       {bookingStatus && (
-        <div className={`mb-4 p-2 text-center rounded ${bookingStatus.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+        <div
+          className={`mb-4 p-2 text-center rounded ${
+            bookingStatus.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+          }`}
+        >
           {bookingStatus.message}
         </div>
       )}
@@ -117,7 +139,7 @@ console.log("filteredClasses",filteredClasses);
               <div className="mt-4 w-full">
                 <button
                   className="w-full p-2 bg-blue-500 text-white rounded hover:bg-green-600"
-                  onClick={() => handleBookNow(cls._id)}
+                  onClick={() => handleBookNow(cls)}
                 >
                   Book Now
                 </button>
