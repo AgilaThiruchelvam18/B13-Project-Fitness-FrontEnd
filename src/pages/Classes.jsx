@@ -135,7 +135,7 @@ const Classes = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="w-full p-6">
       <h2 className="text-xl font-semibold mb-4">Create Class</h2>
       <div className="grid grid-cols-2 gap-4">
         <input type="text" name="title" placeholder="Class Title" value={formData.title} onChange={handleChange} className="p-2 border rounded" />
