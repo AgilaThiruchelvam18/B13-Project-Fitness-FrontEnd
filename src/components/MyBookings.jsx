@@ -21,7 +21,7 @@ const MyBookings = () => {
         const response = await axios.get("https://fitnesshub-5yf3.onrender.com/api/bookings", {
           withCredentials: true, // 👈 Ensures HTTP-only cookies are sent
         });
-
+console.log("Bookings",response.data);
         setBookings(response.data); // ✅ Update state with user's bookings
       } catch (err) {
         setError(err.response?.data?.message || "Failed to fetch bookings");
