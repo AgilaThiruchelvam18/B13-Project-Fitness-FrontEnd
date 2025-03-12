@@ -13,7 +13,7 @@ const DashNavbar = () => {
       try {
         const response = await axios.get("https://fitnesshub-5yf3.onrender.com/api/user-auth/profile", { withCredentials: true });
         setUsername(response.data);
-        console.log("response.data",response.data)
+        console.log("response",response)
         console.log("username",username)
       } catch (error) {
         console.error("Error fetching user", error);
