@@ -87,10 +87,24 @@ const UpcomingClasses = () => {
         {filteredClasses.length > 0 ? (
           filteredClasses.map((cls) => (
             <div key={cls._id} className="bg-gray-100 p-4 rounded-lg shadow-md flex flex-col items-center text-center">
-              <img src={cls.image || cardio} alt={cls.title} className="w-32 h-32 object-cover rounded-lg mb-3" />
+              {/* <img src={cls.image || cardio} alt={cls.title} className="w-32 h-32 object-cover rounded-lg mb-3" /> */}
               <h3 className="text-lg font-semibold">{cls.title}</h3>
-              <p className="text-sm text-gray-500">{cls.category}</p>
-              <p className="text-sm text-gray-500">⏳ {cls.duration} mins</p>
+              <div className="w-full flex flex-col justify-between">
+              <div className="w-full flex flex-row justify-between">
+                 <p className="text-gray-600">
+                                  <Link to={`/customer/CustomerDashboard/TrainerDetails/${cls.trainer._id}`} className="text-blue-500 hover:underline">
+                                  {cls.trainer.userName}
+                                  </Link>
+                                </p>
+      <p className="text-yellow-500 text-md">⭐{cls.trainer.ratings.averageRating}/5</p>
+
+      </div>
+      <div  className="w-full flex flex-row justify-between">
+      <p className="text-sm text-gray-500">{cls.category}</p>
+      <p className="text-sm text-gray-500">⏳ {cls.duration} mins</p>
+      </div>
+      </div>
+         
               <div className="mt-4 w-full">
                 <button className="w-full p-2 bg-blue-500 text-white rounded hover:bg-green-600" onClick={() => handleBookNow(cls)}>
                   Book Now

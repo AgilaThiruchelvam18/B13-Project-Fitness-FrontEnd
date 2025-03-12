@@ -24,7 +24,7 @@ const categories = [
 ];
 
 return (
-  <div className="w-full max-h-full flex flex-col flex-end p-4 ">
+  <div className="w-full h-screen flex flex-col p-4 ">
    <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
       {categories.map((category, index) => (
        <Link to={`/customer/CustomerDashboard/myfitness/trainerslist/${category.categorytype}`}><CardItem key={index} title={category.title} color=
@@ -32,11 +32,11 @@ return (
       ))}
     </div>
     
-    <div className=" w-full  bg-white rounded-lg  shadow-md p-2 overflow-x-auto">
+    <div className=" w-full  bg-white  p-2 overflow-x-auto">
       <h2 className="text-lg font-semibold my-2">Recommended Classes</h2>
-     <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 ">
+     <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 ">
 <div className="flex flex-col justify-between gap-2 object-cover rounded shadow-md text-center bg-gray-200 p-2">
-<img src={class1} alt="image" className="mx-auto rounded-lg "/>
+{/* <img src={class1} alt="image" className="mx-auto rounded-lg "/> */}
 <h1 className="text-lg font-bold">Event Name</h1>
 <div className="flex justify-between">
 <h1 className="text-md">Trainer Name</h1>
@@ -48,7 +48,7 @@ return (
 </div>
 </div>
 <div className="flex flex-col justify-between gap-2 object-cover rounded shadow-md text-center bg-gray-200 p-2">
-<img src={class1} alt="image" className="mx-auto rounded-lg "/>
+{/* <img src={class1} alt="image" className="mx-auto rounded-lg "/> */}
 <h1 className="text-lg font-bold">Event Name</h1>
 <div className="flex justify-between">
 <h1 className="text-md">Trainer Name</h1>

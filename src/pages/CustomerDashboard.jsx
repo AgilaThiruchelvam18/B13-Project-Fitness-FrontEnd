@@ -29,12 +29,13 @@ const CustomerDashboard = () => {
             <Route path="myfitness" element={<MyFitness />} />
             <Route path="myfitness/trainerslist/:category" element={<TrainersList />} />   
            <Route path="mybookings" element={<MyBookings />} />
-           <Route path="TrainerDetails" element={<TrainerDetails />} />
+           <Route path="TrainerDetails/:id" element={<TrainerDetails />} />
             <Route path="bookinghistory" element={<BookingHistory />} />
             <Route path="upcomingclasses" element={<UpcomingClasses />} />
             TrainerDetails
           </Routes>
         </DashPage>
+        
       </div>
     </div>
   );

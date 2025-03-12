@@ -69,7 +69,6 @@ const TrainersList = () => {
   }, [urlCategory]);
 
   const content = categoryContent[selectedCategory] || categoryContent["all"];
-console.log("Trainers",trainers)
 console.log("urlCategory",urlCategory)
   // Filter trainers based on selected category
   const filteredTrainers =
@@ -79,6 +78,7 @@ console.log("urlCategory",urlCategory)
         trainer.expertise.some((exp) => exp.toLowerCase() === selectedCategory.toLowerCase())
       );
 
+      console.log("filteredTrainers",filteredTrainers)
 
   return (
     <div className="max-w-6xl mx-auto mt-10 p-6">
@@ -126,9 +126,10 @@ console.log("urlCategory",urlCategory)
               />
 
               {/* Trainer Name & Rating */}
+              <div className="w-full flex flex-row justify-between">
               <h3 className="text-lg font-semibold">{trainer.userName}</h3>
               <p className="text-yellow-500">⭐ {trainer.ratings?.averageRating || "N/A"}/5</p>
-
+</div>
               {/* Categories */}
               <p className="text-gray-600 text-sm">
                 Expertise: {trainer.expertise?.join(", ") || "N/A"}
@@ -136,7 +137,7 @@ console.log("urlCategory",urlCategory)
 
               {/* View Details Button */}
               <Link
-                to={`/TrainerDetails/${trainer.id}`}
+                to={`/customer/CustomerDashboard/TrainerDetails/${trainer._id}`}
                 className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
                 View Coach Details

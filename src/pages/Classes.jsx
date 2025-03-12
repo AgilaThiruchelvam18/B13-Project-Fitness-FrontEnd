@@ -7,7 +7,7 @@ const Classes = () => {
     title: "",
     trainer: "",
     description: "",
-    category: "",
+    category: "Yoga",
     duration: "",
     capacity: "",
     price: "",
@@ -141,7 +141,7 @@ const Classes = () => {
         <input type="text" name="title" placeholder="Class Title" value={formData.title} onChange={handleChange} className="p-2 border rounded" />
         <input type="text" name="description" placeholder="Class Description" value={formData.description} onChange={handleChange} className="p-2 border rounded" />
         <select name="category" placeholder="Category" value={formData.category} onChange={handleChange} className="p-2 border rounded" >
-        <option value="Yoga" selected>Yoga</option>
+        <option value="Yoga" >Yoga</option>
           <option value="Strength Training">Strength Training</option>
           <option value="Cardio">Cardio</option>
           <option value="Meditation">Meditation</option>
