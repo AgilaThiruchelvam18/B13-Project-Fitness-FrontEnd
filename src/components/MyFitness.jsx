@@ -20,6 +20,8 @@ const MyFitness = () => {
       try {
         const response = await axios.get("https://fitnesshub-5yf3.onrender.com/api/user-auth/profile", { withCredentials: true });
         setUserId(response.data._id);
+     
+
       } catch (error) {
         console.error("Error fetching user ID:", error);
       }
@@ -29,20 +31,26 @@ const MyFitness = () => {
   }, []);
 
   useEffect(() => {
+    if (!userId) return; // Ensure userId is available
+  
+    console.log("Fetching recommendations for userId:", userId); // Debugging log
+  
     const fetchRecommendations = async () => {
       try {
-        // const userId = "USER_ID_HERE"; // Replace with actual user ID from authentication
         const response = await axios.get(`https://fitnesshub-5yf3.onrender.com/api/recommendations/${userId}`, {
           withCredentials: true,
         });
+  
+        console.log("Fetched recommendations:", response.data);
         setRecommendedClasses(response.data.recommendedClasses || []);
       } catch (error) {
-        console.error("Error fetching recommended classes:", error);
+        console.error("Error fetching recommended classes:", error.response?.data || error.message);
       }
     };
-
+  
     fetchRecommendations();
-  }, []);
+  }, [userId]);
+  
 
   const categories = [
     { title: "Yoga", description: "Enhance flexibility and peace of mind.", color: "bg-green-100", backgroundImage: yoga, categorytype: "yoga" },
