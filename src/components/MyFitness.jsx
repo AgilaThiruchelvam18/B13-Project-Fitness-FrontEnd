@@ -42,9 +42,10 @@ const MyFitness = () => {
         });
   
         console.log("Fetched recommendations:", response.data);
-        console.log("recommendedClasses:", recommendedClasses);
 
         setRecommendedClasses(response.data.recommendedClasses || []);
+        console.log("recommendedClasses:", recommendedClasses);
+
       } catch (error) {
         console.error("Error fetching recommended classes:", error.response?.data || error.message);
       }
@@ -82,7 +83,7 @@ const MyFitness = () => {
                 {/* <img src={classItem.image || classItem.fallbackImage} alt="class" className="mx-auto rounded-lg" /> */}
                 <h1 className="text-lg font-bold">{classItem.title}</h1>
                 <div className="flex justify-between">
-                  <h1 className="text-md">{classItem.trainer.userName}</h1>
+                  <h1 className="text-md">{classItem.trainer.useName}</h1>
                   {/* <p className="text-md">{classItem.trainer.ratings[0].averageRating|| "N/A"}</p> */}
                 </div>
                 <div className="flex justify-between">
