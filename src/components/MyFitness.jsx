@@ -83,7 +83,7 @@ const MyFitness = () => {
                 <h1 className="text-lg font-bold">{classItem.title}</h1>
                 <div className="flex justify-between">
                   <h1 className="text-md">{classItem.trainer.userName}</h1>
-                  <p className="text-md">{classItem.trainer.ratings[0].averageRating|| "N/A"}</p>
+                  {/* <p className="text-md">{classItem.trainer.ratings[0].averageRating|| "N/A"}</p> */}
                 </div>
                 <div className="flex justify-between">
                   <p className="text-md">{classItem.category}</p>
