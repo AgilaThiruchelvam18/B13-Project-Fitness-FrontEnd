@@ -162,7 +162,7 @@ console.log("userData",userData)
             onChange={handleChange}
             className="w-full p-2 border rounded-md"
             disabled={!editProfile}
-            placeholder="Current Password"
+            placeholder="**********"
           />
           {editProfile ? (
             <div className="flex gap-2">
