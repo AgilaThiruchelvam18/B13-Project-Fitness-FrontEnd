@@ -28,7 +28,7 @@ const DashNavbar = () => {
   const handleLogout = async () => {
     try {
       await axios.post("https://fitnesshub-5yf3.onrender.com/api/user-auth/logout", {}, { withCredentials: true });
-      navigate("/login"); // Redirect to login after logout
+      navigate("/customer/login"); // Redirect to login after logout
     } catch (error) {
       console.error("Logout failed", error);
     }
