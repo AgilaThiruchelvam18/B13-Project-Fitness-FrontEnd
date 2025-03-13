@@ -10,6 +10,9 @@ import TrainersList from "../components/TrainersList";
 import TrainerDetails from "../components/TrainerDetails";
 import ProtectedRoute from "../components/ProtectedRoute"; // Ensure protected access
 import { useEffect } from "react";
+import CustomerDetails from "../components/CustomerDetails";
+
+
 //import { useNavigate } from "react-router-dom";
 
 const CustomerDashboard = () => {
@@ -30,6 +33,7 @@ const CustomerDashboard = () => {
             <Route path="myfitness/trainerslist/:category" element={<TrainersList />} />   
            <Route path="mybookings" element={<MyBookings />} />
            <Route path="TrainerDetails/:id" element={<TrainerDetails />} />
+           <Route path="CustomerDetails/:id" element={<CustomerDetails />} />
             <Route path="bookinghistory" element={<BookingHistory />} />
             <Route path="upcomingclasses" element={<UpcomingClasses />} />
             TrainerDetails
