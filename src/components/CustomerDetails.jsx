@@ -25,6 +25,7 @@ const CustomerProfile = () => {
           "https://fitnesshub-5yf3.onrender.com/api/user-auth/profile",
           { withCredentials: true }
         );
+        console.log("res.data",res.data)
 
         const userData = {
           id: res.data._id,
@@ -38,7 +39,7 @@ const CustomerProfile = () => {
           gender: res.data.gender || "",
           password:  res.data.password
         };
-
+console.log("userData",userData)
         setUser(userData);
         setOriginalUser(userData);
       } catch (err) {
