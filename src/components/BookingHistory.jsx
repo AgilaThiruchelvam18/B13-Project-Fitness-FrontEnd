@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 
 // Categories & Status Filters
-const categories = ["All", "Cardio", "Yoga", "Strength", "Zumba", "Meditation"];
+const categories = ["All", "Cardio", "Yoga", "Strength Training", "Zumba", "Meditation"];
 const statusFilters = ["All", "Active", "Completed", "Cancelled"];
 
 const BookingHistory = () => {

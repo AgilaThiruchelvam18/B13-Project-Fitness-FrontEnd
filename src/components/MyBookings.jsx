@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-const categories = ["All", "Cardio", "Yoga", "Strength", "Zumba", "Meditation"];
+const categories = ["All", "Cardio", "Yoga", "Strength Training", "Zumba", "Meditation"];
 
 const MyBookings = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");

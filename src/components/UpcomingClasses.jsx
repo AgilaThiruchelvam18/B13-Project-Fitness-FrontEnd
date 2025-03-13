@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import cardio from "../assets/cardio.png"; // Placeholder image
 
-const categories = ["All", "Yoga", "Cardio", "Strength", "Zumba", "Meditation"];
+const categories = ["All", "Yoga", "Cardio", "Strength Training", "Zumba", "Meditation"];
 
 const UpcomingClasses = () => {
   const [classes, setClasses] = useState([]);
