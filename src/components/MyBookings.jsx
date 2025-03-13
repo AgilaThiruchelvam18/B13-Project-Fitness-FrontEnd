@@ -6,6 +6,7 @@ const categories = ["All", "Cardio", "Yoga", "Strength Training", "Zumba", "Medi
 
 const MyBookings = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,16 +60,16 @@ const MyBookings = () => {
   };
 
   // 🔥 Filtered Bookings List
-  const filteredBookings =
-    selectedCategory === "All"
-      ? bookings
-      : bookings.filter((booking) => booking.category === selectedCategory);
+  const filteredBookings = bookings.filter((booking) =>
+    (selectedCategory === "All" || booking.category === selectedCategory) &&
+    booking.classId.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="max-w-6xl mx-auto mt-10 overflow-y-auto p-6">
       <h2 className="text-2xl font-semibold mb-6">My Bookings</h2>
 
-      {/* Filter Buttons */}
+      {/* Search & Filter Section */}
       <div className="flex flex-wrap justify-between items-center mb-6">
         <div className="flex gap-3">
           {categories.map((category) => (
@@ -85,6 +86,13 @@ const MyBookings = () => {
             </button>
           ))}
         </div>
+        <input
+          type="text"
+          placeholder="Search by class title..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="border px-4 py-2 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
+        />
       </div>
 
       {/* Loading & Error Handling */}
@@ -154,76 +162,6 @@ const MyBookings = () => {
           )
         )}
       </div>
-
-      {/* Booking Details Modal */}
-      {showBookingDetails && selectedBooking && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg w-96">
-            <h3 className="text-3xl font-semibold m-2">
-              {selectedBooking.classId.title}
-            </h3>
-            <p className="text-gray-600 text-lg">
-              Description: {selectedBooking.classId.description}
-            </p>
-            <p className="text-gray-600 text-lg">
-              Trainer: {selectedBooking.trainer.userName}
-            </p>
-            <p className="text-gray-600 text-lg">
-              Category: {selectedBooking.category}
-            </p>
-            <p className="text-gray-600 text-lg">
-              Duration: {selectedBooking.classId.duration} mins
-            </p>
-            <p className="text-gray-600 text-lg">
-              Date:{" "}
-              {new Date(
-                selectedBooking.classId.timeSlots[0]?.date
-              ).toLocaleDateString()}
-            </p>
-            <p className="text-gray-600 text-lg">
-              Time: {selectedBooking.classId.timeSlots[0]?.time}
-            </p>
-            <p className="text-gray-600 text-lg">
-              Capacity: {selectedBooking.classId.capacity}
-            </p>
-            <p className="text-gray-600 text-lg">
-              Price: ${selectedBooking.price}
-            </p>
-
-            <div className="flex justify-end mt-4">
-              <button
-                className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
-                onClick={() => setShowBookingDetails(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Cancel Confirmation Popup */}
-      {showCancelConfirm && selectedBooking && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg w-80">
-            <p className="text-lg font-semibold">Cancel this booking?</p>
-            <div className="flex justify-between mt-4">
-              <button
-                onClick={() => setShowCancelConfirm(false)}
-                className="bg-gray-400 p-2 rounded text-white"
-              >
-                No
-              </button>
-              <button
-                onClick={handleCancelBooking}
-                className="bg-red-500 p-2 rounded text-white"
-              >
-                Yes, Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

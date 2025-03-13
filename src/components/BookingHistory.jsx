@@ -10,6 +10,7 @@ const BookingHistory = () => {
   const [bookingHistory, setBookingHistory] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch Booking History from API
   useEffect(() => {
@@ -24,16 +25,27 @@ const BookingHistory = () => {
     fetchBookingHistory();
   }, []);
 
-  // Apply Category and Status Filters
+  // Apply Category, Status, and Search Filters
   const filteredHistory = bookingHistory.filter((booking) => {
     const categoryMatch = selectedCategory === "All" || booking.category.toLowerCase() === selectedCategory.toLowerCase();
     const statusMatch = selectedStatus === "All" || booking.status === selectedStatus;
-    return categoryMatch && statusMatch;
+    const searchMatch = booking.classId.title.toLowerCase().includes(searchQuery.toLowerCase());
+    return categoryMatch && statusMatch && searchMatch;
   });
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 rounded-lg shadow-lg bg-gray-50 h-screen overflow-y-auto">
-      <h2 className="text-2xl font-semibold mb-6">Booking History</h2>
+      {/* Header & Search Box */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold">Booking History</h2>
+        <input
+          type="text"
+          placeholder="Search by class title..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="border px-4 py-2 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
+        />
+      </div>
 
       {/* Filter Container */}
       <div className="flex justify-between items-center mb-6">
@@ -53,19 +65,17 @@ const BookingHistory = () => {
         </div>
 
         {/* Right: Status Filter Dropdown */}
-        <div>
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-4 py-2 border rounded-md text-sm font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none"
-          >
-            {statusFilters.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </select>
-        </div>
+        <select
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+          className="px-4 py-2 border rounded-md text-sm font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none"
+        >
+          {statusFilters.map((status) => (
+            <option key={status} value={status}>
+              {status}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Booking History List */}
@@ -105,25 +115,11 @@ const BookingHistory = () => {
               >
                 {booking.status}
               </div>
-
-              {/* Right: Rating & Feedback (Only for Completed) */}
-              {/* {booking.status === "Completed" ? (
-                <div className="flex flex-col items-center">
-                  <p className="text-yellow-500 text-lg">⭐ {booking.trainer.ratings.averageRating || "N/A"}/5</p>
-                  <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                    Give Feedback
-                  </button>
-                </div>
-              ) 
-              : (
-                <div className="text-red-500 font-semibold">Cancelled</div>
-              )} */}
             </div>
           ))
         ) : (
-          <p className="text-center text-gray-600">No history available in this category.</p>
-        )
-        }
+          <p className="text-center text-gray-600">No history available.</p>
+        )}
       </div>
     </div>
   );
