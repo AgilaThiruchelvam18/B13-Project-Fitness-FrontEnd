@@ -44,7 +44,7 @@ const UpcomingClasses = () => {
 
     try {
       const bookingData = {
-        classId: cls._id,
+        class: cls._id,
         trainerId: cls.trainer, // ✅ FIXED: Directly using `cls.trainer` (trainer ID string)
         category: cls.category,
         price: cls.price,
