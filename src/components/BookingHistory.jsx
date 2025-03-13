@@ -82,14 +82,14 @@ const BookingHistory = () => {
             >
               {/* Left: Booking Details */}
               <div className="flex flex-col px-4">
-                <p className="text-gray-600 font-semibold">{booking.class.title}</p>
+                <p className="text-gray-600 font-semibold">{booking.classId.title}</p>
                 <p className="text-sm text-gray-500">
                   Trainer:{" "}
                   <Link to={`/customer/CustomerDashboard/TrainerDetails/${booking.trainer._id}`} className="text-blue-500 hover:underline">
                     {booking.trainer.userName}
                   </Link>
                 </p>
-                <p className="text-sm text-gray-500">Duration: {booking.class.duration} mins</p>
+                <p className="text-sm text-gray-500">Duration: {booking.classId.duration} mins</p>
                 <p className="text-sm text-gray-500">Category: {booking.category}</p>
               </div>
 

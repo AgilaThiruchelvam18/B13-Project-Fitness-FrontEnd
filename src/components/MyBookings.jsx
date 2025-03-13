@@ -89,7 +89,7 @@ const MyBookings = () => {
         {bookings.length > 0 ? (
           bookings.map((booking) => (
             <div key={booking._id} className="bg-gray-100 p-4 rounded-lg shadow-md flex flex-col items-center text-center">
-              <h3 className="text-lg font-semibold">{booking.class.title}</h3>
+              <h3 className="text-lg font-semibold">{booking.classId.title}</h3>
               <div className="flex flex-row w-full justify-between">
                 <p className="text-gray-600">
                   <Link to={`/customer/CustomerDashboard/TrainerDetails/${booking.trainer._id}`} className="text-blue-500 hover:underline">
@@ -100,7 +100,7 @@ const MyBookings = () => {
               </div>
               <div className="w-full flex flex-row justify-between">
                 <p className="text-sm text-gray-500">{booking.category}</p>
-                <p className="text-sm text-gray-500">⏳ {booking.class.duration} mins</p>
+                <p className="text-sm text-gray-500">⏳ {booking.classId.duration} mins</p>
               </div>
 
               {/* Buttons */}
@@ -137,16 +137,16 @@ const MyBookings = () => {
       {showBookingDetails && selectedBooking && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-96">
-          <h3 className="text-3xl font-semibold m-2">{selectedBooking.class.title}</h3>
-          <p className="text-gray-600 text-lg">Description:{selectedBooking.class.description}</p>
+          <h3 className="text-3xl font-semibold m-2">{selectedBooking.classId.title}</h3>
+          <p className="text-gray-600 text-lg">Description:{selectedBooking.classId.description}</p>
             <p className="text-gray-600 text-lg">
               Trainer: {selectedBooking.trainer.userName}
             </p>
             <p className="text-gray-600 text-lg">Category: {selectedBooking.category}</p>
-            <p className="text-gray-600 text-lg">Duration: {selectedBooking.class.duration} mins</p>
-            <p className="text-gray-600 text-lg">Date: {new Date(selectedBooking.class.timeSlots[0].date).toLocaleDateString()}</p>
-            <p className="text-gray-600 text-lg">Time: {selectedBooking.class.timeSlots[0].time}</p>
-            <p className="text-gray-600 text-lg">Capacity: {selectedBooking.class.capacity}</p>
+            <p className="text-gray-600 text-lg">Duration: {selectedBooking.classId.duration} mins</p>
+            <p className="text-gray-600 text-lg">Date: {new Date(selectedBooking.classId.timeSlots[0].date).toLocaleDateString()}</p>
+            <p className="text-gray-600 text-lg">Time: {selectedBooking.classId.timeSlots[0].time}</p>
+            <p className="text-gray-600 text-lg">Capacity: {selectedBooking.classId.capacity}</p>
             <p className="text-gray-600 text-lg">Price: ${selectedBooking.price}</p>
 
             {/* Recurrence Details */}
