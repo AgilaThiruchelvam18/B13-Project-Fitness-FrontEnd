@@ -32,8 +32,7 @@ const TrainerProfile = () => {
         const res = await axios.get(
           "https://fitnesshub-5yf3.onrender.com/api/trainer-auth/profile",
           { withCredentials: true }
-        );
-
+        )
         if (res.data) {
           const userData = {
             id: res.data._id,
@@ -45,8 +44,8 @@ const TrainerProfile = () => {
             experience: res.data.experience || "",
             bio: res.data.bio || "",
             expertise: Array.isArray(res.data.expertise)
-              ? res.data.expertise.join(", ")
-              : res.data.expertise || "",
+            ? res.data.expertise.join(", ") 
+            : res.data.expertise || "",
             ratings: res.data.ratings || { averageRating: 0, totalReviews: 0 },
             reviews: res.data.reviews || [],
             mediaUploads: res.data.mediaUploads || [],
@@ -77,7 +76,7 @@ const TrainerProfile = () => {
           userName: trainer.username,
           phone: trainer.phone,
          
-          expertise: trainer.expertise.split(",").map((exp) => exp.trim()),
+          expertise:  trainer.expertise.split(",").map((exp) => exp.trim()),
           specialization: trainer.specialization,
           experience: trainer.experience,
           bio: trainer.bio,
@@ -125,7 +124,7 @@ const TrainerProfile = () => {
       <div className="max-w-5xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-[-4rem] relative z-10">
         <div className="flex items-center gap-6">
           <img
-            src={trainer.profilePicture || "https://via.placeholder.com/150"}
+            src={trainer.profilePicture}
             alt="Profile"
             className="w-32 h-32 rounded-full border-4 border-white shadow-md object-cover"
           />
