@@ -8,28 +8,21 @@ const TrainerSignup = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  // ✅ Validation Schema
   const validationSchema = Yup.object({
     userName: Yup.string().required("Username is required"),
     email: Yup.string().email("Invalid email").required("Email is required"),
     password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
-    confirmPassword: Yup.string()
-      .oneOf([Yup.ref("password"), null], "Passwords must match")
-      .required("Confirm password is required"),
+    confirmPassword: Yup.string().oneOf([Yup.ref("password"), null], "Passwords must match").required("Confirm password is required"),
     phone: Yup.string().matches(/^\d{10}$/, "Phone number must be exactly 10 digits").required("Phone number is required"),
     expertise: Yup.array().min(1, "Select at least one expertise"),
+    specialization: Yup.string(),
+    experience: Yup.number().min(0, "Experience must be a positive number").required("Experience is required"),
     bio: Yup.string().required("Bio is required"),
-    certifications: Yup.array(),
-    availability: Yup.array().min(1, "Select availability"),
-    coverMedia: Yup.mixed().nullable(),
-    socialLinks: Yup.object({
-      facebook: Yup.string().url("Invalid URL").nullable(),
-      instagram: Yup.string().url("Invalid URL").nullable(),
-      twitter: Yup.string().url("Invalid URL").nullable(),
-      linkedin: Yup.string().url("Invalid URL").nullable(),
-      youtube: Yup.string().url("Invalid URL").nullable(),
-    }),
+    certifications: Yup.string(),
+    mediaUploads: Yup.mixed(),
   });
+
+  const expertiseOptions = ["Yoga", "Strength Training", "Cardio", "Zumba", "Meditation", "Nutrition"];
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
@@ -45,52 +38,33 @@ const TrainerSignup = () => {
             confirmPassword: "",
             phone: "",
             expertise: [],
+            specialization: "",
+            experience: "",
             bio: "",
-            certifications: [],
-            // availability: [],
-            coverMedia: null,
-            // socialLinks: {
-            //   facebook: "",
-            //   instagram: "",
-            //   twitter: "",
-            //   linkedin: "",
-            //   youtube: "",
-            // },
+            certifications: "",
+            mediaUploads: [],
           }}
           validationSchema={validationSchema}
           onSubmit={async (values, { setSubmitting }) => {
-            console.log("Submitting Form Values:", values);
-
             try {
               const formData = new FormData();
-
-              // ✅ Append data correctly
               Object.entries(values).forEach(([key, value]) => {
                 if (Array.isArray(value)) {
-                  value.forEach((item) => formData.append(key, item));
-                } else if (key === "coverMedia" && value) {
-                  formData.append(key, value);
-                } else if (typeof value === "object") {
-                  formData.append(key, JSON.stringify(value));
+                  value.forEach((item) => formData.append(`${key}[]`, item));
                 } else {
                   formData.append(key, value);
                 }
               });
 
-              console.log("FormData before submission:", Object.fromEntries(formData.entries()));
-
-              // ✅ API Call
               const response = await axios.post(
                 "https://fitnesshub-5yf3.onrender.com/api/trainer-auth/register",
-                formData,  
-                { withCredentials: true,headers: { "Content-Type": "multipart/form-data" } }
+                formData,
+                { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
               );
 
-              console.log("Response Data:", response.data);
               setMessage(response.data.message);
               setTimeout(() => navigate("/trainer/login"), 2000);
             } catch (error) {
-              console.error("Error Response:", error.response?.data || error.message);
               setMessage(error.response?.data?.message || "Registration failed");
             } finally {
               setSubmitting(false);
@@ -115,28 +89,39 @@ const TrainerSignup = () => {
               <ErrorMessage name="phone" component="div" className="text-red-500 text-sm" />
 
               <label className="mt-2">Expertise:</label>
-              <Field as="select" name="expertise" multiple className="border p-2 rounded mt-1">
-                {["Yoga", "Strength Training", "Cardio", "Zumba", "Meditation", "Nutrition"].map((option) => (
-                  <option key={option} value={option}>{option}</option>
+              <div className="grid grid-cols-2 gap-2">
+                {expertiseOptions.map((option) => (
+                  <label key={option} className="flex items-center">
+                    <Field type="checkbox" name="expertise" value={option} className="mr-2" />
+                    {option}
+                  </label>
                 ))}
-              </Field>
+              </div>
               <ErrorMessage name="expertise" component="div" className="text-red-500 text-sm" />
+
+              <Field type="text" name="specialization" placeholder="Specialization" className="border p-2 rounded mt-1" />
+              <ErrorMessage name="specialization" component="div" className="text-red-500 text-sm" />
+
+              <Field type="text" name="certifications" placeholder="Certifications" className="border p-2 rounded mt-1" />
+              <ErrorMessage name="certifications" component="div" className="text-red-500 text-sm" />
+
+              <Field type="number" name="experience" placeholder="Years of Experience" className="border p-2 rounded mt-1" />
+              <ErrorMessage name="experience" component="div" className="text-red-500 text-sm" />
 
               <Field as="textarea" name="bio" placeholder="Short Bio" className="border p-2 rounded mt-1" />
               <ErrorMessage name="bio" component="div" className="text-red-500 text-sm" />
 
-              {/* <label className="mt-2">Cover Media (Image/Video):</label>
+              <label className="mt-2">Upload Photos/Videos:</label>
               <input
                 type="file"
                 accept="image/*, video/*"
-                onChange={(event) => setFieldValue("coverMedia", event.target.files[0])}
+                multiple
+                onChange={(event) => setFieldValue("mediaUploads", Array.from(event.target.files))}
                 className="border p-2 rounded mt-1"
-              /> */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`mt-4 py-2 rounded ${isSubmitting ? "bg-gray-400" : "bg-blue-500 text-white"}`}
-              >
+              />
+              <ErrorMessage name="mediaUploads" component="div" className="text-red-500 text-sm" />
+
+              <button type="submit" disabled={isSubmitting} className={`mt-4 py-2 rounded ${isSubmitting ? "bg-gray-400" : "bg-blue-500 text-white"}`}>
                 {isSubmitting ? "Registering..." : "Sign Up"}
               </button>
             </Form>

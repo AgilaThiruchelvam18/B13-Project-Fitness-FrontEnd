@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Classes from "./Classes";
 import TrainerDashNavbar from "../components/TrainerDashNavbar";
 import DashPage from "../components/DashPage";
+import TrainerInfo from "../components/TrainerInfo";
 
 // import Schedule from "./Schedule";
 // import Bookings from "./Bookings";
@@ -25,6 +26,8 @@ function TrainerDashboard() {
       <DashPage>
       <Routes>
             <Route path="classes" element={<Classes />} />
+            <Route path="/TrainerInfo/67d0778210c16edc8848085d" element={<TrainerInfo />} />
+
       //       {/* <Route path="schedule" element={<TrainerProtectedRoute><Schedule /></TrainerProtectedRoute>} />
       //       <Route path="bookings" element={<TrainerProtectedRoute><Bookings /></TrainerProtectedRoute>} />
       //       <Route path="earnings" element={<TrainerProtectedRoute><Earnings /></TrainerProtectedRoute>} />

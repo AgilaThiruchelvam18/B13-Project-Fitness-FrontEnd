@@ -184,4 +184,4 @@ console.log("userData",userData)
   );
 };
 
-export default CustomerProfile;
+export default TrainerProfile;

@@ -15,10 +15,11 @@ const TrainerDashNavbar = () => {
   useEffect(() => {
     const fetchTrainer = async () => {
       try {
-        const response = await axios.get("https://fitnesshub-5yf3.onrender.com/api/trainer-auth/profile", { withCredentials: true });
-        setTrainerName(response.data.userName);
-        setTrainerId(response.data._id);
-        setProfilePicture(response.data.profilePicture); // Save profile pic
+        // const response = await axios.get("https://fitnesshub-5yf3.onrender.com/api/trainer-auth/profile", { withCredentials: true });
+        setTrainerName("yono");
+        // setTrainerName(response.data.userName);
+        // setTrainerId(response.data._id);
+        // setProfilePicture(response.data.profilePicture); // Save profile pic
 
         // console.log("response",response)
         // console.log("response.data",response.data)
@@ -60,7 +61,7 @@ const TrainerDashNavbar = () => {
         {/* Dropdown Menu */}
         {showDropdown && (
           <div className="absolute right-0 mt-2 w-32 bg-white border rounded-lg px-4 py-2 shadow-lg z-10">
-             <Link to={`/trainer/TrainerDashboard/TrainerInfo/${trainerId}`}>
+             <Link to={`/trainer/TrainerDashboard/TrainerInfo/67d0778210c16edc8848085d`}>
                                               Profile
                                               </Link>
             <button 
