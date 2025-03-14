@@ -10,97 +10,111 @@ const TrainerProfile = () => {
     fitnessGoal: "",
     age: "",
     gender: "",
-    password: ""
+    password: "",
+    expertise: "",
+    certifications: "",
+    specialization: "",
+    experience: "",
+    bio: "",
+    ratings: { averageRating: 0, totalReviews: 0 },
+    reviews: [],
+    mediaUploads: [],
   });
-
+  const [trainerId, setTrainerId] = useState(null);
   const [editProfile, setEditProfile] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [originalUser, setOriginalUser] = useState(null);
+  const [originalTrainer, setOriginalTrainer] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const res = await axios.get(
-          "https://fitnesshub-5yf3.onrender.com/api/user-auth/profile",
+          "https://fitnessbookingapi.onrender.com/api/trainer-auth/profile",
           { withCredentials: true }
         );
-        console.log("res.data",res.data)
+
+        console.log("res.data", res.data);
 
         const userData = {
           id: res.data._id,
-          username: res.data.userName,
-          email: res.data.email,
+          username: res.data.userName || "",
+          email: res.data.email || "",
           phone: res.data.phone || "",
-          fitnessGoal: Array.isArray(res.data.fitnessGoals)
-            ? res.data.fitnessGoals.join(", ")
-            : res.data.fitnessGoals || "",
+          fitnessGoal: res.data.fitnessGoal || "",
           age: res.data.age || "",
           gender: res.data.gender || "",
-          password:  res.data.password
+          password: res.data.password || "",
+          certifications: res.data.certifications || "",
+          specialization: res.data.specialization || "",
+          experience: res.data.experience || "",
+          bio: res.data.bio || "",
+          expertise: Array.isArray(res.data.expertise)
+            ? res.data.expertise.join(", ")
+            : res.data.expertise || "",
+          ratings: res.data.ratings || { averageRating: 0, totalReviews: 0 },
+          reviews: res.data.reviews || [],
+          mediaUploads: res.data.mediaUploads || [],
         };
-console.log("userData",userData)
-        setUser(userData);
-        setOriginalUser(userData);
-      } catch (err) {
-        console.error("Error fetching profile:", err);
+        setTrainerId(userData.id);
+        setTrainer(userData);
+        setOriginalTrainer(userData);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
       }
     };
+
     fetchProfile();
   }, []);
 
-  const handleChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
+  const handleChange = (e) => setTrainer({ ...trainer, [e.target.name]: e.target.value });
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
       await axios.put(
-        `https://fitnesshub-5yf3.onrender.com/api/users/${user.id}`,
+        `https://fitnessbookingapi.onrender.com/api/trainers/${trainerId}`,
         {
-          userName: user.username,
-          phone: user.phone,
-          fitnessGoals: Array.isArray(user.fitnessGoal)
-            ? user.fitnessGoal
-            : [user.fitnessGoal],
-          age: user.age,
-          gender: user.gender,
-          password: user.password
-
+          userName: trainer.username,
+          phone: trainer.phone,
+          fitnessGoal: trainer.fitnessGoal,
+          age: trainer.age,
+          gender: trainer.gender,
+          expertise: trainer.expertise,
+          specialization: trainer.specialization,
+          experience: trainer.experience,
+          bio: trainer.bio,
+          certifications: trainer.certifications.split(",").map((cert) => cert.trim()),
+          ratings: trainer.ratings,
+          reviews: trainer.reviews,
+          mediaUploads: trainer.mediaUploads,
         },
         { withCredentials: true }
       );
-      
-    //   if (user.currentPassword) {
-    //     await axios.put(
-    //       "https://fitnesshub-5yf3.onrender.com/api/users/change-password",
-    //       {
-    //         currentPassword: user.currentPassword,
-    //       },
-    //       { withCredentials: true }
-    //     );
-    //   }
 
       setMessage("Profile updated successfully!");
       setEditProfile(false);
-      setOriginalUser(user);
-    } catch (err) {
-      console.error("Update failed:", err);
-      setMessage("Update failed. Try again.");
+      setOriginalTrainer(trainer);
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      setMessage("Failed to update profile. Please try again.");
     }
+
     setLoading(false);
   };
 
   const handleCancelEdit = () => {
-    if (originalUser) {
-      setUser(originalUser);
+    if (originalTrainer) {
+      setTrainer(originalTrainer);
     }
     setEditProfile(false);
   };
 
   return (
     <div className="max-w-lg mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-semibold mb-4">Customer Profile</h2>
+      <h2 className="text-2xl font-semibold mb-4">Trainer Profile</h2>
       {message && <p className="text-green-600 mb-4">{message}</p>}
 
       <div className="border-b pb-4 mb-4">
@@ -109,17 +123,17 @@ console.log("userData",userData)
           <input
             type="text"
             name="username"
-            value={user.username}
+            value={trainer.username}
             onChange={handleChange}
             className="w-full p-2 border rounded-md"
             disabled={!editProfile}
             placeholder="Name"
           />
-          <input type="email" value={user.email} className="w-full p-2 border rounded-md bg-gray-200" disabled />
+          <input type="email" value={trainer.email} className="w-full p-2 border rounded-md bg-gray-200" disabled />
           <input
             type="text"
             name="phone"
-            value={user.phone}
+            value={trainer.phone}
             onChange={handleChange}
             className="w-full p-2 border rounded-md"
             disabled={!editProfile}
@@ -128,7 +142,7 @@ console.log("userData",userData)
           <input
             type="text"
             name="fitnessGoal"
-            value={typeof user.fitnessGoal === "object" ? JSON.stringify(user.fitnessGoal) : user.fitnessGoal}
+            value={trainer.fitnessGoal}
             onChange={handleChange}
             className="w-full p-2 border rounded-md"
             disabled={!editProfile}
@@ -137,7 +151,7 @@ console.log("userData",userData)
           <input
             type="number"
             name="age"
-            value={user.age}
+            value={trainer.age}
             onChange={handleChange}
             className="w-full p-2 border rounded-md"
             disabled={!editProfile}
@@ -145,7 +159,7 @@ console.log("userData",userData)
           />
           <select
             name="gender"
-            value={user.gender}
+            value={trainer.gender}
             onChange={handleChange}
             className="w-full p-2 border rounded-md"
             disabled={!editProfile}
@@ -156,9 +170,53 @@ console.log("userData",userData)
             <option value="Other">Other</option>
           </select>
           <input
+            type="text"
+            name="expertise"
+            value={trainer.expertise}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-md"
+            disabled={!editProfile}
+            placeholder="Expertise"
+          />
+          <input
+            type="text"
+            name="specialization"
+            value={trainer.specialization}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-md"
+            disabled={!editProfile}
+            placeholder="Specialization"
+          />
+          <input
+            type="text"
+            name="experience"
+            value={trainer.experience}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-md"
+            disabled={!editProfile}
+            placeholder="Experience"
+          />
+          <textarea
+            name="bio"
+            value={trainer.bio}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-md"
+            disabled={!editProfile}
+            placeholder="Bio"
+          />
+          <input
+            type="text"
+            name="certifications"
+            value={trainer.certifications}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-md"
+            disabled={!editProfile}
+            placeholder="Certifications (comma-separated)"
+          />
+          <input
             type="password"
             name="password"
-            value={user.password}
+            value={trainer.password}
             onChange={handleChange}
             className="w-full p-2 border rounded-md"
             disabled={!editProfile}

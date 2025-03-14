@@ -26,7 +26,7 @@ function TrainerDashboard() {
       <DashPage>
       <Routes>
             <Route path="classes" element={<Classes />} />
-            <Route path="/TrainerInfo/67d0778210c16edc8848085d" element={<TrainerInfo />} />
+            <Route path="/TrainerInfo/:id" element={<TrainerInfo />} />
 
       //       {/* <Route path="schedule" element={<TrainerProtectedRoute><Schedule /></TrainerProtectedRoute>} />
       //       <Route path="bookings" element={<TrainerProtectedRoute><Bookings /></TrainerProtectedRoute>} />

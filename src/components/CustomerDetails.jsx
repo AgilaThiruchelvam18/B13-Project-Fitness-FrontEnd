@@ -17,7 +17,7 @@ const CustomerProfile = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [originalUser, setOriginalUser] = useState(null);
-
+const[userId,setUserId]=useState(null)
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -41,6 +41,7 @@ const CustomerProfile = () => {
         };
 console.log("userData",userData)
         setUser(userData);
+        setUserId(userData.id)
         setOriginalUser(userData);
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -56,7 +57,7 @@ console.log("userData",userData)
     setLoading(true);
     try {
       await axios.put(
-        `https://fitnesshub-5yf3.onrender.com/api/users/${user.id}`,
+        `https://fitnesshub-5yf3.onrender.com/api/users/${userId}`,
         {
           userName: user.username,
           phone: user.phone,
