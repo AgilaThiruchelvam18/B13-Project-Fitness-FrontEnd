@@ -6,6 +6,7 @@ const categories = ["Yoga", "Strength Training", "Zumba", "Meditation", "Cardio"
 
 const Classes = () => {
   const [classes, setClasses] = useState([]);
+  const [scheduleType, setScheduleType] = useState("One-time");
   const [newClass, setNewClass] = useState({
     title: "",
     description: "",
@@ -19,6 +20,9 @@ const Classes = () => {
       blockedDates: [],
       startDate: "",
       endDate: "",
+      oneTimeDate: "",
+      oneTimeStartTime: "",
+      oneTimeEndTime: ""
     },
   });
 
@@ -40,60 +44,8 @@ const Classes = () => {
     setNewClass((prev) => ({ ...prev, [name]: value }));
   };
 
-  const toggleDaySelection = (day) => {
-    setNewClass((prev) => {
-      const isSelected = prev.schedule.enabledDays.includes(day);
-      return {
-        ...prev,
-        schedule: {
-          ...prev.schedule,
-          enabledDays: isSelected
-            ? prev.schedule.enabledDays.filter((d) => d !== day)
-            : [...prev.schedule.enabledDays, day],
-          timeSlots: isSelected ? { ...prev.schedule.timeSlots, [day]: [] } : prev.schedule.timeSlots,
-        },
-      };
-    });
-  };
-
-  const addTimeSlot = (day) => {
-    setNewClass((prev) => ({
-      ...prev,
-      schedule: {
-        ...prev.schedule,
-        timeSlots: {
-          ...prev.schedule.timeSlots,
-          [day]: [...(prev.schedule.timeSlots[day] || []), { startTime: "", endTime: "" }],
-        },
-      },
-    }));
-  };
-
-  const updateTimeSlot = (day, index, field, value) => {
-    setNewClass((prev) => {
-      const updatedSlots = [...prev.schedule.timeSlots[day]];
-      updatedSlots[index][field] = value;
-      return {
-        ...prev,
-        schedule: {
-          ...prev.schedule,
-          timeSlots: { ...prev.schedule.timeSlots, [day]: updatedSlots },
-        },
-      };
-    });
-  };
-
-  const removeTimeSlot = (day, index) => {
-    setNewClass((prev) => {
-      const updatedSlots = prev.schedule.timeSlots[day].filter((_, i) => i !== index);
-      return {
-        ...prev,
-        schedule: {
-          ...prev.schedule,
-          timeSlots: { ...prev.schedule.timeSlots, [day]: updatedSlots },
-        },
-      };
-    });
+  const handleScheduleTypeChange = (e) => {
+    setScheduleType(e.target.value);
   };
 
   const handleSubmit = async (e) => {
@@ -108,7 +60,16 @@ const Classes = () => {
         duration: "",
         price: "",
         capacity: "",
-        schedule: { enabledDays: [], timeSlots: {}, blockedDates: [], startDate: "", endDate: "" },
+        schedule: {
+          enabledDays: [],
+          timeSlots: {},
+          blockedDates: [],
+          startDate: "",
+          endDate: "",
+          oneTimeDate: "",
+          oneTimeStartTime: "",
+          oneTimeEndTime: ""
+        },
       });
     } catch (error) {
       console.error(error);
@@ -130,49 +91,55 @@ const Classes = () => {
         <input type="number" name="duration" placeholder="Duration (minutes)" value={newClass.duration} onChange={handleInputChange} className="border p-2 rounded w-full" required />
         <input type="number" name="price" placeholder="Price ($)" value={newClass.price} onChange={handleInputChange} className="border p-2 rounded w-full" required />
         <input type="number" name="capacity" placeholder="Capacity" value={newClass.capacity} onChange={handleInputChange} className="border p-2 rounded w-full" required />
-        <input 
-  type="date" 
-  name="startDate" 
-  value={newClass.schedule.startDate} 
-  onChange={(e) => setNewClass((prev) => ({ 
-    ...prev, 
-    schedule: { ...prev.schedule, startDate: e.target.value } 
-  }))} 
-  className="border p-2 rounded w-full" 
-  required 
-/>
+        
+        <select value={scheduleType} onChange={handleScheduleTypeChange} className="border p-2 rounded w-full" required>
+          <option value="One-time">One-time</option>
+          <option value="Recurrent">Recurrent</option>
+        </select>
 
-<input 
-  type="date" 
-  name="endDate" 
-  value={newClass.schedule.endDate} 
-  onChange={(e) => setNewClass((prev) => ({ 
-    ...prev, 
-    schedule: { ...prev.schedule, endDate: e.target.value } 
-  }))} 
-  className="border p-2 rounded w-full mt-2" 
-  required 
-/>
-
-        <div>
-          <p className="font-semibold">Select Available Days:</p>
-          {daysOfWeek.map((day) => (
-            <button key={day} type="button" onClick={() => toggleDaySelection(day)} className={`p-2 m-1 rounded ${newClass.schedule.enabledDays.includes(day) ? "bg-green-500 text-white" : "bg-gray-300"}`}>{day}</button>
-          ))}
-        </div>
-        {newClass.schedule.enabledDays.map((day) => (
-          <div key={day} className="mt-2 p-2 border rounded">
-            <p className="font-semibold">{day}</p>
-            {newClass.schedule.timeSlots[day]?.map((slot, index) => (
-              <div key={index} className="flex space-x-2">
-                <input type="time" value={slot.startTime} onChange={(e) => updateTimeSlot(day, index, "startTime", e.target.value)} className="border p-2 rounded" required />
-                <input type="time" value={slot.endTime} onChange={(e) => updateTimeSlot(day, index, "endTime", e.target.value)} className="border p-2 rounded" required />
-                <button type="button" onClick={() => removeTimeSlot(day, index)} className="bg-red-500 text-white p-2 rounded">Remove</button>
-              </div>
-            ))}
-            <button type="button" onClick={() => addTimeSlot(day)} className="bg-blue-500 text-white p-2 rounded mt-2">Add Time Slot</button>
-          </div>
-        ))}
+        {scheduleType === "One-time" ? (
+          <>
+            <input 
+              type="date" 
+              name="oneTimeDate" 
+              value={newClass.schedule.oneTimeDate} 
+              onChange={(e) => setNewClass((prev) => ({ 
+                ...prev, 
+                schedule: { ...prev.schedule, oneTimeDate: e.target.value } 
+              }))} 
+              className="border p-2 rounded w-full" 
+              required 
+            />
+            <input 
+              type="time" 
+              name="oneTimeStartTime" 
+              value={newClass.schedule.oneTimeStartTime} 
+              onChange={(e) => setNewClass((prev) => ({ 
+                ...prev, 
+                schedule: { ...prev.schedule, oneTimeStartTime: e.target.value } 
+              }))} 
+              className="border p-2 rounded w-full" 
+              required 
+            />
+            <input 
+              type="time" 
+              name="oneTimeEndTime" 
+              value={newClass.schedule.oneTimeEndTime} 
+              onChange={(e) => setNewClass((prev) => ({ 
+                ...prev, 
+                schedule: { ...prev.schedule, oneTimeEndTime: e.target.value } 
+              }))} 
+              className="border p-2 rounded w-full" 
+              required 
+            />
+          </>
+        ) : (
+          <>
+            <input type="date" name="startDate" value={newClass.schedule.startDate} onChange={(e) => setNewClass((prev) => ({ ...prev, schedule: { ...prev.schedule, startDate: e.target.value } }))} className="border p-2 rounded w-full" required />
+            <input type="date" name="endDate" value={newClass.schedule.endDate} onChange={(e) => setNewClass((prev) => ({ ...prev, schedule: { ...prev.schedule, endDate: e.target.value } }))} className="border p-2 rounded w-full mt-2" required />
+          </>
+        )}
+        
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded mt-4">Create Class</button>
       </form>
     </div>
