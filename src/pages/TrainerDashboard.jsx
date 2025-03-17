@@ -4,7 +4,7 @@ import Classes from "./Classes";
 import TrainerDashNavbar from "../components/TrainerDashNavbar";
 import DashPage from "../components/DashPage";
 import TrainerInfo from "../components/TrainerInfo";
-
+import TrainerSchedule from "../components/TrainerSchedule";
 // import Schedule from "./Schedule";
 // import Bookings from "./Bookings";
 // import Earnings from "./Earnings";
@@ -27,6 +27,8 @@ function TrainerDashboard() {
       <Routes>
             <Route path="classes" element={<Classes />} />
             <Route path="profile" element={<TrainerInfo />} />
+            <Route path="schedule" element={<TrainerSchedule />} />
+
             <Route path="/TrainerInfo/:id" element={<TrainerInfo />} />
 
       //       {/* <Route path="schedule" element={<TrainerProtectedRoute><Schedule /></TrainerProtectedRoute>} />
