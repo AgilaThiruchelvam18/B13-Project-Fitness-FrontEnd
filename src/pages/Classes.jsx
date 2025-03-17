@@ -6,7 +6,6 @@ const categories = ["Yoga", "Strength Training", "Zumba", "Meditation", "Cardio"
 
 const Classes = () => {
   const [classes, setClasses] = useState([]);
-  const [scheduleType, setScheduleType] = useState("One-time");
   const [newClass, setNewClass] = useState({
     title: "",
     description: "",
@@ -15,14 +14,15 @@ const Classes = () => {
     price: "",
     capacity: "",
     schedule: {
+      scheduleType: "One-time",
+      oneTimeDate: "",
+      oneTimeStartTime: "",
+      oneTimeEndTime: "",
       enabledDays: [],
       timeSlots: {},
       blockedDates: [],
       startDate: "",
       endDate: "",
-      oneTimeDate: "",
-      oneTimeStartTime: "",
-      oneTimeEndTime: ""
     },
   });
 
@@ -41,11 +41,83 @@ const Classes = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewClass((prev) => ({ ...prev, [name]: value }));
+  
+    setNewClass((prev) => {
+      // Check if the field belongs to the schedule object
+      if (["oneTimeDate", "oneTimeStartTime", "oneTimeEndTime", "startDate", "endDate"].includes(name)) {
+        return {
+          ...prev,
+          schedule: { ...prev.schedule, [name]: value },
+        };
+      }
+      return { ...prev, [name]: value };
+    });
+  };
+  
+  const handleScheduleTypeChange = (e) => {
+    setNewClass((prev) => ({
+      ...prev,
+      schedule: { ...prev.schedule, scheduleType: e.target.value },
+    }));
   };
 
-  const handleScheduleTypeChange = (e) => {
-    setScheduleType(e.target.value);
+  const toggleDaySelection = (day) => {
+    setNewClass((prev) => {
+      const isSelected = prev.schedule.enabledDays.includes(day);
+      return {
+        ...prev,
+        schedule: {
+          ...prev.schedule,
+          enabledDays: isSelected
+            ? prev.schedule.enabledDays.filter((d) => d !== day)
+            : [...prev.schedule.enabledDays, day],
+          timeSlots: isSelected ? { ...prev.schedule.timeSlots, [day]: [] } : prev.schedule.timeSlots,
+        },
+      };
+    });
+  };
+
+  const addTimeSlot = (day) => {
+    setNewClass((prev) => {
+      const updatedSlots = prev.schedule.timeSlots[day] || [];
+      return {
+        ...prev,
+        schedule: {
+          ...prev.schedule,
+          timeSlots: {
+            ...prev.schedule.timeSlots,
+            [day]: [...updatedSlots, { startTime: "", endTime: "" }],
+          },
+        },
+      };
+    });
+  };
+
+  const updateTimeSlot = (day, index, field, value) => {
+    setNewClass((prev) => {
+      const updatedSlots = [...prev.schedule.timeSlots[day]];
+      updatedSlots[index][field] = value;
+      return {
+        ...prev,
+        schedule: {
+          ...prev.schedule,
+          timeSlots: { ...prev.schedule.timeSlots, [day]: updatedSlots },
+        },
+      };
+    });
+  };
+
+  const removeTimeSlot = (day, index) => {
+    setNewClass((prev) => {
+      const updatedSlots = prev.schedule.timeSlots[day].filter((_, i) => i !== index);
+      return {
+        ...prev,
+        schedule: {
+          ...prev.schedule,
+          timeSlots: { ...prev.schedule.timeSlots, [day]: updatedSlots },
+        },
+      };
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -60,16 +132,7 @@ const Classes = () => {
         duration: "",
         price: "",
         capacity: "",
-        schedule: {
-          enabledDays: [],
-          timeSlots: {},
-          blockedDates: [],
-          startDate: "",
-          endDate: "",
-          oneTimeDate: "",
-          oneTimeStartTime: "",
-          oneTimeEndTime: ""
-        },
+        schedule: { scheduleType: "One-time", oneTimeDate: "", oneTimeStartTime: "", oneTimeEndTime: "", enabledDays: [], timeSlots: {}, blockedDates: [], startDate: "", endDate: "" },
       });
     } catch (error) {
       console.error(error);
@@ -82,7 +145,7 @@ const Classes = () => {
       <form onSubmit={handleSubmit} className="mb-4 border p-4 rounded bg-gray-100 space-y-3">
         <input type="text" name="title" placeholder="Class Title" value={newClass.title} onChange={handleInputChange} className="border p-2 rounded w-full" required />
         <textarea name="description" placeholder="Class Description" value={newClass.description} onChange={handleInputChange} className="border p-2 rounded w-full" required />
-        <select name="category" value={newClass.category} onChange={handleInputChange} className="border p-2 rounded w-full" required>
+        <select name="category" value={newClass.category} onChange={handleInputChange} className="border p-2 rounded w-full">
           <option value="">Select Category</option>
           {categories.map((cat) => (
             <option key={cat} value={cat}>{cat}</option>
@@ -91,55 +154,55 @@ const Classes = () => {
         <input type="number" name="duration" placeholder="Duration (minutes)" value={newClass.duration} onChange={handleInputChange} className="border p-2 rounded w-full" required />
         <input type="number" name="price" placeholder="Price ($)" value={newClass.price} onChange={handleInputChange} className="border p-2 rounded w-full" required />
         <input type="number" name="capacity" placeholder="Capacity" value={newClass.capacity} onChange={handleInputChange} className="border p-2 rounded w-full" required />
-        
-        <select value={scheduleType} onChange={handleScheduleTypeChange} className="border p-2 rounded w-full" required>
+        <select name="scheduleType" value={newClass.schedule.scheduleType} onChange={handleScheduleTypeChange} className="border p-2 rounded w-full">
           <option value="One-time">One-time</option>
           <option value="Recurrent">Recurrent</option>
         </select>
-
-        {scheduleType === "One-time" ? (
+        {newClass.schedule.scheduleType === "One-time" ? (
           <>
-            <input 
-              type="date" 
-              name="oneTimeDate" 
-              value={newClass.schedule.oneTimeDate} 
-              onChange={(e) => setNewClass((prev) => ({ 
-                ...prev, 
-                schedule: { ...prev.schedule, oneTimeDate: e.target.value } 
-              }))} 
-              className="border p-2 rounded w-full" 
-              required 
-            />
-            <input 
-              type="time" 
-              name="oneTimeStartTime" 
-              value={newClass.schedule.oneTimeStartTime} 
-              onChange={(e) => setNewClass((prev) => ({ 
-                ...prev, 
-                schedule: { ...prev.schedule, oneTimeStartTime: e.target.value } 
-              }))} 
-              className="border p-2 rounded w-full" 
-              required 
-            />
-            <input 
-              type="time" 
-              name="oneTimeEndTime" 
-              value={newClass.schedule.oneTimeEndTime} 
-              onChange={(e) => setNewClass((prev) => ({ 
-                ...prev, 
-                schedule: { ...prev.schedule, oneTimeEndTime: e.target.value } 
-              }))} 
-              className="border p-2 rounded w-full" 
-              required 
-            />
+            <input type="date" name="oneTimeDate" value={newClass.schedule.oneTimeDate} onChange={handleInputChange} className="border p-2 rounded w-full" required />
+            <input type="time" name="oneTimeStartTime" value={newClass.schedule.oneTimeStartTime} onChange={handleInputChange} className="border p-2 rounded w-full" required />
+            <input type="time" name="oneTimeEndTime" value={newClass.schedule.oneTimeEndTime} onChange={handleInputChange} className="border p-2 rounded w-full" required />
           </>
         ) : (
           <>
-            <input type="date" name="startDate" value={newClass.schedule.startDate} onChange={(e) => setNewClass((prev) => ({ ...prev, schedule: { ...prev.schedule, startDate: e.target.value } }))} className="border p-2 rounded w-full" required />
-            <input type="date" name="endDate" value={newClass.schedule.endDate} onChange={(e) => setNewClass((prev) => ({ ...prev, schedule: { ...prev.schedule, endDate: e.target.value } }))} className="border p-2 rounded w-full mt-2" required />
+            <div>
+            <input 
+      type="date" 
+      name="startDate" 
+      value={newClass.schedule.startDate} 
+      onChange={handleInputChange} 
+      className="border p-2 rounded w-full m-1" 
+      required 
+    />
+    <input 
+      type="date" 
+      name="endDate" 
+      value={newClass.schedule.endDate} 
+      onChange={handleInputChange} 
+      className="border p-2 rounded w-full m-1" 
+      required 
+    />
+              <p className="font-semibold">Select Available Days:</p>
+              {daysOfWeek.map((day) => (
+                <button key={day} type="button" onClick={() => toggleDaySelection(day)} className={`p-2 m-1 rounded ${newClass.schedule.enabledDays.includes(day) ? "bg-green-500 text-white" : "bg-gray-300"}`}>{day}</button>
+              ))}
+            </div>
+            {newClass.schedule.enabledDays.map((day) => (
+              <div key={day} className="mt-2 p-2 border rounded">
+                <p className="font-semibold">{day}</p>
+                {newClass.schedule.timeSlots[day]?.map((slot, index) => (
+                  <div key={index} className="flex space-x-2">
+                    <input type="time" value={slot.startTime} onChange={(e) => updateTimeSlot(day, index, "startTime", e.target.value)} className="border p-2 rounded" required />
+                    <input type="time" value={slot.endTime} onChange={(e) => updateTimeSlot(day, index, "endTime", e.target.value)} className="border p-2 rounded" required />
+                    <button type="button" onClick={() => removeTimeSlot(day, index)} className="bg-red-500 text-white p-2 rounded">Remove</button>
+                  </div>
+                ))}
+                <button type="button" onClick={() => addTimeSlot(day)} className="bg-blue-500 text-white p-2 rounded mt-2">Add Time Slot</button>
+              </div>
+            ))}
           </>
         )}
-        
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded mt-4">Create Class</button>
       </form>
     </div>
