@@ -22,13 +22,21 @@ const TrainerLoginForm = () => {
           initialValues={{ email: "", password: "" }}
           validationSchema={validationSchema}
           onSubmit={async (values, { setSubmitting }) => {
-            try {
+            try {response.data.user.id
               const response = await axios.post(
                 "https://fitnesshub-5yf3.onrender.com/api/trainer-auth/login",
                 values,
                 { withCredentials: true }
               );
-              navigate("/trainer/TrainerDashboard");
+          
+              // Extract trainerId from response
+              const trainerId = response.data.user.id; // Ensure the backend sends trainerId in response
+          
+              if (trainerId) {
+                navigate(`/trainer/TrainerDashboard/TrainerInfo/${trainerId}`);
+              } else {
+                setMessage("Trainer ID not found in response");
+              }
             } catch (error) {
               setMessage(error.response?.data?.message || "Login failed");
             }

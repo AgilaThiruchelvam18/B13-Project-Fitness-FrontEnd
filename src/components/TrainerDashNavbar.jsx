@@ -39,7 +39,7 @@ const TrainerDashNavbar = () => {
   };
 
   return (
-    <div className="w-full bg-gray-200 text-black p-4 shadow-md flex justify-between items-center border border-black">
+    <div className="w-full bg-gray-200 text-black p-4 shadow-md flex justify-between items-center ">
       {/* Left: Welcome Message */}
       <h2 className="text-lg font-semibold">Hi {trainerName || "Guest"},</h2>
 

@@ -3,197 +3,120 @@ import axios from "axios";
 
 const Classes = () => {
   const [classes, setClasses] = useState([]);
-  const [formData, setFormData] = useState({
+  const [newClass, setNewClass] = useState({
     title: "",
-    trainer: "",
     description: "",
-    category: "Yoga",
-    duration: "",
-    capacity: "",
-    price: "",
-    timeSlot: {
-      date: "",
-      time: "",
-      ampm: "AM",
-      recurrence: "one-time",
-      recurrenceDetails: {
-        daily: { startDate: "", endDate: "" },
-        weekly: [],
-      },
+    category: "",
+    duration: 60,
+    image: "",
+    capacity: 10,
+    price: 0,
+    schedule: {
+      enabledDays: [],
+      timeSlots: [],
+      blockedDates: [],
     },
   });
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchClasses();
   }, []);
-  useEffect(() => {
-    const fetchTrainer = async () => {
-      try {
-        const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/trainers/profile", { withCredentials: true });
 
-        
-        setFormData((prev) => ({ ...prev, trainer: res.data._id }));
-      } catch (err) {
-        console.error("Error fetching trainer info", err);
-      }
-    };
-  
-    fetchTrainer();
-  }, []);
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes", { 
-        withCredentials: true 
-      });
-      setClasses(res.data);
-    } catch (err) {
-      console.error("Error fetching classes", err);
+      const { data } = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes",{ withCredentials: true });
+      setClasses(data);
+    } catch (error) {
+      console.error(error);
+      setError("Failed to fetch classes");
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleTimeSlotChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      timeSlot: { ...prev.timeSlot, [name]: value },
-    }));
-  };
-
-  const handleRecurrenceChange = (e) => {
-    const value = e.target.value;
-    setFormData((prev) => ({
-      ...prev,
-      timeSlot: {
-        ...prev.timeSlot,
-        recurrence: value,
-        recurrenceDetails: {
-          daily: { startDate: "", endDate: "" },
-          weekly: [],
-        },
-      },
-    }));
-  };
-
-  const handleWeeklySelection = (day) => {
-    setFormData((prev) => {
-      const updatedWeekly = prev.timeSlot.recurrenceDetails.weekly.includes(day)
-        ? prev.timeSlot.recurrenceDetails.weekly.filter((d) => d !== day)
-        : [...prev.timeSlot.recurrenceDetails.weekly, day];
-
+  const handleScheduleChange = (day, startTime, endTime) => {
+    setNewClass((prev) => {
+      const updatedTimeSlots = [...prev.schedule.timeSlots];
+      const existingDay = updatedTimeSlots.find(slot => slot.day === day);
+      if (existingDay) {
+        existingDay.slots.push({ startTime, endTime });
+      } else {
+        updatedTimeSlots.push({ day, slots: [{ startTime, endTime }] });
+      }
       return {
         ...prev,
-        timeSlot: {
-          ...prev.timeSlot,
-          recurrenceDetails: { ...prev.timeSlot.recurrenceDetails, weekly: updatedWeekly },
-        },
+        schedule: { ...prev.schedule, timeSlots: updatedTimeSlots },
       };
     });
   };
 
-  const handleCreateClass = async () => {
+  const handleBlockedDateChange = (date) => {
+    setNewClass((prev) => ({
+      ...prev,
+      schedule: {
+        ...prev.schedule,
+        blockedDates: [...new Set([...prev.schedule.blockedDates, date])],
+      },
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
     try {
-      const { date, time, ampm, recurrence, recurrenceDetails } = formData.timeSlot;
-      const timeSlot = [{ date, time: `${time} ${ampm}`, recurrence, recurrenceDetails }];
-      
-      if (recurrence === "daily" && (!recurrenceDetails.daily.startDate || !recurrenceDetails.daily.endDate)) {
-        alert("Please select start and end dates for daily recurrence.");
-        return;
-      }
-      
-      const res = await axios.post("https://fitnesshub-5yf3.onrender.com/api/classes", { ...formData, timeSlots: timeSlot }, { 
-        withCredentials: true 
-      });
-      
-      setClasses([...classes, res.data]);
-      setFormData({
+      await axios.post("/api/classes", newClass);
+      fetchClasses();
+      setNewClass({
         title: "",
-        trainer: formData.trainer,
         description: "",
         category: "",
-        duration: "",
-        capacity: "",
-        price: "",
-        timeSlot: {
-          date: "",
-          time: "",
-          ampm: "AM",
-          recurrence: "one-time",
-          recurrenceDetails: {
-            daily: { startDate: "", endDate: "" },
-            weekly: [],
-          },
+        duration: 60,
+        image: "",
+        capacity: 10,
+        price: 0,
+        schedule: {
+          enabledDays: [],
+          timeSlots: [],
+          blockedDates: [],
         },
       });
-    } catch (err) {
-      console.error("Error creating class", err);
+    } catch (error) {
+      console.error(error);
+      setError("Failed to create class");
     }
   };
 
   return (
-    <div className="w-full p-6">
-      <h2 className="text-xl font-semibold mb-4">Create Class</h2>
-      <div className="grid grid-cols-2 gap-4">
-        <input type="text" name="title" placeholder="Class Title" value={formData.title} onChange={handleChange} className="p-2 border rounded" />
-        <input type="text" name="description" placeholder="Class Description" value={formData.description} onChange={handleChange} className="p-2 border rounded" />
-        <select name="category" placeholder="Category" value={formData.category} onChange={handleChange} className="p-2 border rounded" >
-        <option value="Yoga" >Yoga</option>
-          <option value="Strength Training">Strength Training</option>
-          <option value="Cardio">Cardio</option>
-          <option value="Meditation">Meditation</option>
-          <option value="Zumba">Zumba</option>
-          <option value="Nutrition">Nutrition</option>
-        </select>
-        <input type="number" name="duration" placeholder="Duration (minutes)" value={formData.duration} onChange={handleChange} className="p-2 border rounded" />
-        <input type="number" name="capacity" placeholder="Capacity" value={formData.capacity} onChange={handleChange} className="p-2 border rounded" />
-        <input type="number" name="price" placeholder="Price ($)" value={formData.price} onChange={handleChange} className="p-2 border rounded" />
-        <input type="date" name="date" value={formData.timeSlot.date} onChange={handleTimeSlotChange} className="p-2 border rounded" />
-        <input type="time" name="time" value={formData.timeSlot.time} onChange={handleTimeSlotChange} className="p-2 border rounded" />
-        
-        <select name="recurrence" value={formData.timeSlot.recurrence} onChange={handleRecurrenceChange} className="p-2 border rounded">
-          <option value="one-time">One-time</option>
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-        </select>
-        {formData.timeSlot.recurrence === "daily" && (
-          <>
-            <label>Start Date:</label>
-            <input type="date" name="startDate" value={formData.timeSlot.recurrenceDetails.daily.startDate} onChange={handleTimeSlotChange} className="p-2 border rounded" />
-            <label>End Date:</label>
-            <input type="date" name="endDate" value={formData.timeSlot.recurrenceDetails.daily.endDate} onChange={handleTimeSlotChange} className="p-2 border rounded" />
-          </>
-        )}
-         {formData.timeSlot.recurrence === "weekly" && (
-        <div className=" flex flex-col mt-4">
-          <label>Select Days:</label>
-
-          {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
-            <label key={day} className="mr-2">
-              <input type="checkbox" value={day} checked={formData.timeSlot.recurrenceDetails.weekly.includes(day)} onChange={() => handleWeeklySelection(day)} />
-              {day}
-            </label>
-          ))}
-        </div>
-      )}
-      </div>
-      <button onClick={handleCreateClass} className="mt-4 p-2 bg-blue-500 text-white rounded">Create Event</button>
-      <h3 className="text-lg font-semibold mt-6">Created Events</h3>
-      <div className="mt-4 grid grid-cols-3 gap-4">
-        {classes.map((event) => (
-          <div key={event._id} className="p-4 border rounded shadow">
-            <h4 className="font-medium">{event.title}</h4>
-            <p className="text-sm text-gray-500">{event.description}</p>
-            <p><strong>Category:</strong> {event.category}</p>
-            <p><strong>Duration:</strong> {event.duration} min</p>
-            <p><strong>Capacity:</strong> {event.capacity}</p>
-            <p><strong>Price:</strong> ${event.price}</p>
-            <p><strong>Date:</strong> {event.timeSlots?.[0]?.date || "N/A"}</p>
-            <p><strong>Time:</strong> {event.timeSlots?.[0]?.time || "N/A"}</p>
-            <p><strong>Recurrence:</strong> {event.timeSlots?.[0]?.recurrence}</p>
+    <div className="container mx-auto p-4">
+      <h2 className="text-xl font-bold mb-4">Manage Classes</h2>
+      {error && <p className="text-red-500">{error}</p>}
+      <form onSubmit={handleSubmit} className="mb-4 space-y-2">
+        <input
+          type="text"
+          placeholder="Class Title"
+          value={newClass.title}
+          onChange={(e) => setNewClass({ ...newClass, title: e.target.value })}
+          className="border p-2 rounded w-full"
+        />
+        <input
+          type="text"
+          placeholder="Category"
+          value={newClass.category}
+          onChange={(e) => setNewClass({ ...newClass, category: e.target.value })}
+          className="border p-2 rounded w-full"
+        />
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Create Class</button>
+      </form>
+      <div>
+        {classes.map((cls) => (
+          <div key={cls._id} className="border p-4 mb-2 rounded">
+            <h3 className="font-bold">{cls.title}</h3>
+            <p>Category: {cls.category}</p>
+            <p>Schedule:</p>
+            <ul>
+              {cls.schedule.timeSlots.map((slot, index) => (
+                <li key={index}>{slot.day}: {slot.slots.map(s => `${s.startTime} - ${s.endTime}`).join(", ")}</li>
+              ))}
+            </ul>
           </div>
         ))}
       </div>

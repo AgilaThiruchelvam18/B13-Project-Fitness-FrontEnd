@@ -14,18 +14,19 @@ import Sidebar from "../components/Sidebar";
 
 function TrainerDashboard() {
   return (
-    <div className="flex h-screen">
+    <div className="flex  w-full h-screen overflow-y-auto">
     {/* Sidebar */}
     <Sidebar />
 
     {/* Main Content */}
-    <div className="flex flex-col w-4/5 bg-gray-50">
+    <div className="flex flex-col w-full bg-gray-50 h-screen overflow-y-auto">
       <TrainerDashNavbar />
 
       {/* Page Content */}
       <DashPage>
       <Routes>
             <Route path="classes" element={<Classes />} />
+            <Route path="profile" element={<TrainerInfo />} />
             <Route path="/TrainerInfo/:id" element={<TrainerInfo />} />
 
       //       {/* <Route path="schedule" element={<TrainerProtectedRoute><Schedule /></TrainerProtectedRoute>} />
