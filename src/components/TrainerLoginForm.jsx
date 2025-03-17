@@ -22,7 +22,7 @@ const TrainerLoginForm = () => {
           initialValues={{ email: "", password: "" }}
           validationSchema={validationSchema}
           onSubmit={async (values, { setSubmitting }) => {
-            try {response.data.user.id
+            try {
               const response = await axios.post(
                 "https://fitnesshub-5yf3.onrender.com/api/trainer-auth/login",
                 values,
