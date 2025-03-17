@@ -24,8 +24,8 @@ const TrainerSchedule = () => {
   if (loading) return <div className="text-center">Loading schedule...</div>;
 
   return (
-    <div className="p-6">hello
-      {/* <h1 className="text-2xl font-semibold mb-4">Class Schedule</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-semibold mb-4">Class Schedule</h1>
       {schedule.length === 0 ? (
         <p>No events scheduled.</p>
       ) : (
@@ -48,7 +48,7 @@ const TrainerSchedule = () => {
             </div>
           </div>
         ))
-      )} */}
+      )}
     </div>
   );
 };
