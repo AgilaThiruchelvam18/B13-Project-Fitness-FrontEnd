@@ -8,7 +8,7 @@ const TrainerSchedule = () => {
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
-        const { data } = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes/schedule");
+        const { data } = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes");
         setSchedule(data);
         console.log("schedule======>data", data);
       } catch (error) {
