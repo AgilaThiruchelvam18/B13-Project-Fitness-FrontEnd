@@ -130,6 +130,30 @@ const Classes = () => {
         <input type="number" name="duration" placeholder="Duration (minutes)" value={newClass.duration} onChange={handleInputChange} className="border p-2 rounded w-full" required />
         <input type="number" name="price" placeholder="Price ($)" value={newClass.price} onChange={handleInputChange} className="border p-2 rounded w-full" required />
         <input type="number" name="capacity" placeholder="Capacity" value={newClass.capacity} onChange={handleInputChange} className="border p-2 rounded w-full" required />
+        <input 
+  type="date" 
+  name="startDate" 
+  value={newClass.schedule.startDate} 
+  onChange={(e) => setNewClass((prev) => ({ 
+    ...prev, 
+    schedule: { ...prev.schedule, startDate: e.target.value } 
+  }))} 
+  className="border p-2 rounded w-full" 
+  required 
+/>
+
+<input 
+  type="date" 
+  name="endDate" 
+  value={newClass.schedule.endDate} 
+  onChange={(e) => setNewClass((prev) => ({ 
+    ...prev, 
+    schedule: { ...prev.schedule, endDate: e.target.value } 
+  }))} 
+  className="border p-2 rounded w-full mt-2" 
+  required 
+/>
+
         <div>
           <p className="font-semibold">Select Available Days:</p>
           {daysOfWeek.map((day) => (
