@@ -12,6 +12,8 @@ const TrainerSchedule = () => {
   const [newStartTime, setNewStartTime] = useState("");
   const [newEndTime, setNewEndTime] = useState("");
   const [recurringTimeSlots, setRecurringTimeSlots] = useState([]);
+  const [newTimeSlot, setNewTimeSlot] = useState(null);
+
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -29,6 +31,7 @@ const TrainerSchedule = () => {
 
     fetchSchedule();
   }, []);
+  
 
   const handleView = (event) => {
     setSelectedEvent(event);
@@ -36,22 +39,35 @@ const TrainerSchedule = () => {
   const handleReschedule = (event) => {
     setRescheduleEvent(event);
   }
-
-  const handleEdit = (event, day = null, selectedSlot = null) => {
+  const handleEdit = (event, selectedSlot) => {
     setEditModal(true);
     setRescheduleEvent(event);
   
+    console.log("Selected Slot:", selectedSlot);
+  
+    if (!event?.schedule) {
+      console.error("Event schedule is undefined:", event);
+      return;
+    }
+  
     if (event.schedule.scheduleType === "Recurrent" && selectedSlot) {
+      // Ensure timeSlots is an array before calling find()
+      const timeSlots = Array.isArray(event.schedule.timeSlots) ? event.schedule.timeSlots : [];
+  
+      const foundSlot = timeSlots.find(slot => slot._id === selectedSlot._id);
+  
       setRecurringTimeSlots([
         {
-          day,
-          startTime: selectedSlot.startTime || "",
-          endTime: selectedSlot.endTime || "",
+          day: selectedSlot.day || foundSlot?.day || "Monday",
+          startTime: selectedSlot.startTime || foundSlot?.startTime || "",
+          endTime: selectedSlot.endTime || foundSlot?.endTime || "",
           _id: selectedSlot._id,
         },
       ]);
-      setNewStartTime(selectedSlot.startTime || "");
-      setNewEndTime(selectedSlot.endTime || "");
+  
+      setNewStartTime(selectedSlot.startTime || foundSlot?.startTime || "");
+      setNewEndTime(selectedSlot.endTime || foundSlot?.endTime || "");
+  
     } else if (event.schedule.scheduleType === "One-time") {
       setNewDate(event.schedule.oneTimeDate || "");
       setNewStartTime(event.schedule.oneTimeStartTime || "");
@@ -59,42 +75,55 @@ const TrainerSchedule = () => {
     }
   };
   
-
-  
-  
   
   const handleSaveReschedule = async () => {
     try {
+    
       let payload = {};
   
       if (rescheduleEvent.schedule.scheduleType === "One-time") {
+        if (!newDate || !newStartTime || !newEndTime) {
+          alert("Please select a date and time slot before rescheduling.");
+          return;
+        }
         payload = {
           newDate,
           newTimeSlot: { startTime: newStartTime, endTime: newEndTime },
         };
       } else {
-        payload = {
-          recurringTimeSlots: recurringTimeSlots.map(slot => ({
-            day: slot.day,
+       
+        const formattedSlots = recurringTimeSlots.map(slot => ({
+            day: slot.day || "Monday", // Default to Monday if missing
             startTime: slot.startTime,
             endTime: slot.endTime,
-          })),
-        };
+          }));
+        payload = {
+          recurringTimeSlots: formattedSlots,
+          }
+        //   if (recurringTimeSlots.length === 0) {
+        //     alert("Please add at least one recurring time slot.");
+        //     return;
+        //   }
       }
+      console.log("Recurring Time Slots:", recurringTimeSlots);
+
+      console.log("Sending reschedule request:", payload);
   
-      await axios.put(
+      const response = await axios.put(
         `https://fitnesshub-5yf3.onrender.com/api/classes/${rescheduleEvent._id}/reschedule`,
         payload,
         { withCredentials: true }
       );
   
+      console.log("Reschedule Response:", response.data);
       alert("Class rescheduled successfully!");
       setEditModal(false);
     } catch (error) {
-      console.error("Error rescheduling event:", error);
+      console.error("Error rescheduling event:", error.response?.data || error.message);
       alert("Failed to reschedule class.");
     }
   };
+  
   
 
 
@@ -239,7 +268,7 @@ const TrainerSchedule = () => {
                           {dateString}: {slot.startTime} - {slot.endTime}
                         </span>
                         <button
-                          onClick={() => handleEdit(rescheduleEvent)}
+                          onClick={() => handleEdit(rescheduleEvent,slot)}
                           className="m-2 px-4 py-2 bg-red-500 text-white rounded cursor-pointer"
                           aria-label="Edit session"
                         >
@@ -272,12 +301,12 @@ const TrainerSchedule = () => {
                   Time: {rescheduleEvent.schedule.oneTimeStartTime} - {rescheduleEvent.schedule.oneTimeEndTime}
                 </p>
                 <button
-                  onClick={() => handleEdit(rescheduleEvent)}
-                  className="mt-2 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
-                  aria-label="Edit one-time event"
-                >
-                  Edit
-                </button>
+      key={slot._id}
+      onClick={() => handleEdit(rescheduleEvent, slot)}
+      className="mt-2 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
+    >
+      Edit {slot.day}
+    </button>
               </div>
             );
           })()
