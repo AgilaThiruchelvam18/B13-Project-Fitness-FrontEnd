@@ -122,22 +122,69 @@ const Classes = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await axios.post("https://fitnesshub-5yf3.onrender.com/api/classes", newClass, { withCredentials: true });
-      fetchClasses();
-      setNewClass({
-        title: "",
-        description: "",
-        category: "",
-        duration: "",
-        price: "",
-        capacity: "",
-        schedule: { scheduleType: "One-time", oneTimeDate: "", oneTimeStartTime: "", oneTimeEndTime: "", enabledDays: [], timeSlots: {}, blockedDates: [], startDate: "", endDate: "" },
-      });
-    } catch (error) {
-      console.error(error);
+
+    // Ensure schedule exists
+    if (!newClass.schedule) {
+        console.error("Error: Schedule is undefined.");
+        return;
     }
-  };
+
+    if (newClass.schedule.scheduleType === "Recurrent") {
+        console.log("Time Slots Before Sending:", newClass.schedule.timeSlots);
+
+        if (!newClass.schedule.startDate || !newClass.schedule.endDate) {
+            alert("Please select a valid start and end date.");
+            return;
+        }
+
+        let formattedTimeSlots = [];
+
+        for (let day of newClass.schedule.enabledDays || []) {
+            let slots = newClass.schedule.timeSlots?.[day] || [];
+
+            if (Array.isArray(slots) && slots.length > 0) {
+                slots.forEach(slot => {
+                    formattedTimeSlots.push({
+                        date: newClass.schedule.startDate, // Placeholder, update logic if needed
+                        day,
+                        startTime: slot.startTime,
+                        endTime: slot.endTime
+                    });
+                });
+            }
+        }
+
+        if (formattedTimeSlots.length === 0) {
+            alert("Please add at least one valid time slot for a recurrent schedule.");
+            return;
+        }
+
+        // Assign transformed timeSlots
+        newClass.schedule.timeSlots = formattedTimeSlots;
+    }
+
+    try {
+        console.log("Submitting Class Data:", newClass);
+
+        const response = await axios.post(
+            "https://fitnesshub-5yf3.onrender.com/api/classes",
+            newClass,
+            { withCredentials: true }
+        );
+
+        console.log("Response:", response.data);
+        fetchClasses();
+        setNewClass({ 
+            title: "", description: "", category: "", duration: "", price: "", capacity: "",
+            schedule: { scheduleType: "One-time", oneTimeDate: "", oneTimeStartTime: "", oneTimeEndTime: "", enabledDays: [], timeSlots: {}, blockedDates: [], startDate: "", endDate: "" }
+        });
+    } catch (error) {
+        console.error("Error Submitting Class:", error.response?.data || error.message);
+    }
+};
+
+
+  
 
   return (
     <div className="container mx-auto p-4">
