@@ -77,73 +77,66 @@ const TrainerSchedule = () => {
 
 
 const handleSaveReschedule = async () => {
-    console.log("🔹 newStartTime:", newStartTime);
-    console.log("🔹 newEndTime:", newEndTime);
-    console.log("🔹 recurringTimeSlots Before Update:", recurringTimeSlots);
+  console.log("🔹 newStartTime:", newStartTime);
+  console.log("🔹 newEndTime:", newEndTime);
+  console.log("🔹 recurringTimeSlots Before Update:", recurringTimeSlots);
 
-    try {
-        let payload = {};
+  try {
+      let payload = {};
 
-        if (rescheduleEvent.schedule.scheduleType === "One-time") {
-            if (!newDate || !newStartTime || !newEndTime) {
-                alert("Please select a valid date and time slot.");
-                return;
-            }
+      if (rescheduleEvent.schedule.scheduleType === "One-time") {
+          if (!newDate || !newStartTime || !newEndTime) {
+              alert("Please select a valid date and time slot.");
+              return;
+          }
 
-            payload = {
-                scheduleType: "One-time",
-                newDate: new Date(newDate).toISOString(),
-                newTimeSlot: {
-                    startTime: newStartTime,
-                    endTime: newEndTime,
-                }
-            };
-        } else {
-            // Ensure at least one valid recurring time slot
-            if (!Array.isArray(recurringTimeSlots) || recurringTimeSlots.length === 0) {
-                alert("Please add at least one valid recurring time slot.");
-                return;
-            }
+          payload = {
+              scheduleType: "One-time",
+              newDate: new Date(newDate).toISOString(),
+              newTimeSlot: {
+                  startTime: newStartTime,
+                  endTime: newEndTime,
+              }
+          };
+      } else {
+          // Ensure at least one valid recurring time slot
+          if (!Array.isArray(recurringTimeSlots) || recurringTimeSlots.length === 0) {
+              alert("Please add at least one valid recurring time slot.");
+              return;
+          }
 
-            // Update only the selected slot's start and end times
-            const updatedSlots = recurringTimeSlots.map(slot => ({
-                ...slot, // Preserve existing slot details
-                startTime: newStartTime || slot.startTime, 
-                endTime: newEndTime || slot.endTime,
-            }));
+          // Update only the selected slot's start and end times
+          const updatedSlots = recurringTimeSlots.map(slot => ({
+              ...slot, // Preserve existing slot details
+              startTime: newStartTime || slot.startTime, 
+              endTime: newEndTime || slot.endTime,
+          }));
 
-            console.log("🚀 Sending Updated Time Slots:", updatedSlots);
+          console.log("🚀 Sending Updated Time Slots:", updatedSlots);
 
-            payload = {
-                scheduleType: "Recurrent",
-                recurringTimeSlots: updatedSlots, // Ensure correct data is sent
-                updatedSlot: updatedSlots[0], // Specify which slot is being updated
-            };
-        }
+          payload = {
+              scheduleType: "Recurrent",
+              recurringTimeSlots: updatedSlots, // Ensure correct data is sent
+              updatedSlot: updatedSlots[0], // Specify which slot is being updated
+          };
+      }
 
-        console.log("🚀 Sending reschedule request:", JSON.stringify(payload, null, 2));
+      console.log("🚀 Sending reschedule request:", JSON.stringify(payload, null, 2));
 
-        const response = await axios.put(
-            `https://fitnesshub-5yf3.onrender.com/api/classes/${rescheduleEvent._id}/reschedule`,
-            payload,
-            { withCredentials: true }
-        );
+      const response = await axios.put(
+          `https://fitnesshub-5yf3.onrender.com/api/classes/${rescheduleEvent._id}/reschedule`,
+          payload,
+          { withCredentials: true }
+      );
 
-        console.log("✅ Reschedule Response:", response.data);
-        alert("Class rescheduled successfully!");
-        setEditModal(false);
-    } catch (error) {
-        console.error("❌ Error rescheduling event:", error.response?.data || error.message);
-        alert("Failed to reschedule class. Please try again.");
-    }
+      console.log("✅ Reschedule Response:", response.data);
+      alert("Class rescheduled successfully!");
+      setEditModal(false);
+  } catch (error) {
+      console.error("❌ Error rescheduling event:", error.response?.data || error.message);
+      alert("Failed to reschedule class. Please try again.");
+  }
 };
-
-
-
-
-
-
-  
 
 
   const handleCancel = async (eventId) => {
