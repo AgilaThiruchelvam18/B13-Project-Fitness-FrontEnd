@@ -60,27 +60,54 @@ const MyBookings = () => {
       );
     }
   };
-  const handlePayment = async (bookingId, amount) => {
+  const handlePayment = async (booking) => {
     try {
-      const { data } = await axios.post(
+      console.log("Booking Details:", booking);
+  
+      if (!booking.price || !booking._id || !booking.user) {
+        alert("Invalid booking details. Please try again.");
+        return;
+      }
+  
+      const requestData = {
+        amount: Number(booking.price),
+        bookingId: String(booking._id),
+        userId: String(booking.user._id),  // Ensure userId is sent
+      };
+  
+      console.log("Sending Payment Request:", requestData);
+  
+      const response = await axios.post(
         "https://fitnesshub-5yf3.onrender.com/api/payment/order",
-        { amount, bookingId },
+        requestData,
         { withCredentials: true }
       );
   
+      console.log("Payment Order Response:", response.data);
+  
+      if (!response.data.success) {
+        alert(response.data.message);
+        return;
+      }
+  
+      // 🟢 Start Razorpay Checkout
       const options = {
         key: "YOUR_RAZORPAY_KEY_ID",
-        amount: data.order.amount,
+        amount: response.data.order.amount,
         currency: "INR",
-        order_id: data.order.id,
-        handler: async function (response) {
-          await axios.post("https://fitnesshub-5yf3.onrender.com/api/payment/verify", response);
+        name: "FitnessHub",
+        description: "Payment for fitness class",
+        order_id: response.data.order.id,
+        handler: async function (paymentResult) {
+          console.log("Payment Success:", paymentResult);
+  
+          await axios.post("https://fitnesshub-5yf3.onrender.com/api/payment/verify", {
+            razorpayOrderId: paymentResult.razorpay_order_id,
+            razorpayPaymentId: paymentResult.razorpay_payment_id,
+            bookingId: booking._id,
+          });
+  
           alert("Payment Successful!");
-        },
-        prefill: {
-          name: "User Name",
-          email: "user@example.com",
-          contact: "9999999999",
         },
         theme: {
           color: "#3399cc",
@@ -91,8 +118,10 @@ const MyBookings = () => {
       rzp.open();
     } catch (error) {
       console.error("Error initiating payment:", error);
+      alert("Payment failed. Please try again.");
     }
   };
+  
   
   // 🔥 Filtered Bookings List
   const filteredBookings = bookings.filter((booking) =>
@@ -168,7 +197,8 @@ const MyBookings = () => {
                 <div>
                 <button
   className="w-full p-2 bg-green-500 text-white rounded hover:bg-green-700"
-  onClick={() => handlePayment(booking)}
+  onClick={() => {    console.log("Booking Data:", booking); // Debugging log
+    handlePayment(booking);}}
 >
   Pay Now
 </button>
