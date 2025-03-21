@@ -88,7 +88,7 @@ const MyBookings = () => {
       // Handle Razorpay Checkout
       const { order } = response.data;
       const options = {
-        key: rzp_test_yMMQBxrAmvtN8W,
+        key: "rzp_test_yMMQBxrAmvtN8W",
         amount: order.amount,
         currency: order.currency,
         name: "FitnessHub",
