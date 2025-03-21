@@ -126,7 +126,7 @@ const MyBookings = () => {
     (selectedCategory === "All" || booking.category === selectedCategory) &&
     booking.classId.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
+console.log("Filtered Bookings:", filteredBookings);
   return (
     <div className="max-w-6xl mx-auto mt-10 overflow-y-auto p-6">
       <h2 className="text-2xl font-semibold mb-6">My Bookings</h2>
@@ -192,16 +192,20 @@ const MyBookings = () => {
 
               {/* Buttons */}
               <div className="mt-4 flex flex-col justify-between gap-2 w-full">
-                <div>
-                <button
-  className="w-full p-2 bg-green-500 text-white rounded hover:bg-green-700"
-  onClick={() => {    console.log("Booking Data:", booking); // Debugging log
-    handlePayment(booking);}}
->
-  Pay Now
-</button>
-
-                </div>
+              <div>
+                {booking.paymentStatus === "Paid" ? (
+                  <button className="w-full p-2 bg-gray-500 text-white rounded" disabled>
+                    Paid
+                  </button>
+                ) : (
+                  <button
+                    className="w-full p-2 bg-green-500 text-white rounded hover:bg-green-700"
+                    onClick={() => handlePayment(booking)}
+                  >
+                    Pay Now
+                  </button>
+                )}
+              </div>
                 <div className="flex flex-row">
 
                 <button
