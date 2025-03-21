@@ -62,65 +62,29 @@ const MyBookings = () => {
   };
   const handlePayment = async (booking) => {
     try {
-      console.log("Booking Details:", booking);
-  
-      if (!booking.price || !booking._id || !booking.user) {
-        alert("Invalid booking details. Please try again.");
-        return;
-      }
-  
-      const requestData = {
-        amount: Number(booking.price),
-        bookingId: String(booking._id),
-        userId: String(booking.user._id),  // Ensure userId is sent
-      };
-  
-      console.log("Sending Payment Request:", requestData);
+      console.log("📌 Sending Payment Request with Data:", {
+        amount: booking.price,
+        bookingId: booking._id,
+        userId: booking.user._id,
+      });
   
       const response = await axios.post(
         "https://fitnesshub-5yf3.onrender.com/api/payment/order",
-        requestData,
-        { withCredentials: true }
+        {
+          amount: booking.price, // Ensure this is a number
+          bookingId: booking._id,
+          userId: booking.user._id,
+        },
+        { withCredentials: true } // ✅ Pass credentials (cookies, auth headers)
       );
   
-      console.log("Payment Order Response:", response.data);
-  
-      if (!response.data.success) {
-        alert(response.data.message);
-        return;
-      }
-  
-      // 🟢 Start Razorpay Checkout
-      const options = {
-        key: "YOUR_RAZORPAY_KEY_ID",
-        amount: response.data.order.amount,
-        currency: "INR",
-        name: "FitnessHub",
-        description: "Payment for fitness class",
-        order_id: response.data.order.id,
-        handler: async function (paymentResult) {
-          console.log("Payment Success:", paymentResult);
-  
-          await axios.post("https://fitnesshub-5yf3.onrender.com/api/payment/verify", {
-            razorpayOrderId: paymentResult.razorpay_order_id,
-            razorpayPaymentId: paymentResult.razorpay_payment_id,
-            bookingId: booking._id,
-          });
-  
-          alert("Payment Successful!");
-        },
-        theme: {
-          color: "#3399cc",
-        },
-      };
-  
-      const rzp = new window.Razorpay(options);
-      rzp.open();
+      console.log("✅ Payment Order Response:", response.data);
     } catch (error) {
-      console.error("Error initiating payment:", error);
-      alert("Payment failed. Please try again.");
+      console.error("❌ Error initiating payment:", error.response?.data || error.message);
     }
   };
+  
+  
   
   
   // 🔥 Filtered Bookings List
