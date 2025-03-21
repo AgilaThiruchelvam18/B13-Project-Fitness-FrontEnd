@@ -60,55 +60,37 @@ const MyBookings = () => {
       );
     }
   };
-  const handlePayment = async (booking) => {
+  const handlePayment = async (bookingId, amount) => {
     try {
-      const response = await axios.post(
+      const { data } = await axios.post(
         "https://fitnesshub-5yf3.onrender.com/api/payment/order",
-        { amount: booking.classId.price, bookingId: booking._id },
+        { amount, bookingId },
         { withCredentials: true }
       );
   
-      const { order } = response.data;
-  
       const options = {
-        key: "YOUR_RAZORPAY_KEY_ID", // Replace with actual key
-        amount: order.amount,
-        currency: order.currency,
-        name: "Fitness Hub",
-        description: `Payment for ${booking.classId.title}`,
-        order_id: order.id,
-        handler: async (response) => {
-          try {
-            await axios.post(
-              "https://fitnesshub-5yf3.onrender.com/api/payment/verify",
-              {
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature,
-                bookingId: booking._id,
-              },
-              { withCredentials: true }
-            );
-  
-            alert("Payment successful! Your booking is confirmed.");
-            fetchBookings();
-          } catch (error) {
-            console.error("Payment verification failed:", error);
-            alert("Payment failed! Please try again.");
-          }
+        key: "YOUR_RAZORPAY_KEY_ID",
+        amount: data.order.amount,
+        currency: "INR",
+        order_id: data.order.id,
+        handler: async function (response) {
+          await axios.post("https://fitnesshub-5yf3.onrender.com/api/payment/verify", response);
+          alert("Payment Successful!");
         },
         prefill: {
-          name: booking.user.userName,
-          email: booking.user.email,
+          name: "User Name",
+          email: "user@example.com",
+          contact: "9999999999",
         },
-        theme: { color: "#3399cc" },
+        theme: {
+          color: "#3399cc",
+        },
       };
   
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (error) {
       console.error("Error initiating payment:", error);
-      alert("Error processing payment. Please try again.");
     }
   };
   
