@@ -60,8 +60,13 @@ const MyBookings = () => {
       );
     }
   };
-  const handlePayment = async (booking) => {
+ const handlePayment = async (booking) => {
     try {
+      if (!booking || !booking.price || !booking._id || !booking.user?._id) {
+        console.error("❌ Missing payment details:", booking);
+        return;
+      }
+  
       console.log("📌 Sending Payment Request with Data:", {
         amount: booking.price,
         bookingId: booking._id,
@@ -71,18 +76,47 @@ const MyBookings = () => {
       const response = await axios.post(
         "https://fitnesshub-5yf3.onrender.com/api/payment/order",
         {
-          amount: booking.price, // Ensure this is a number
+          amount: booking.price,
           bookingId: booking._id,
           userId: booking.user._id,
         },
-        { withCredentials: true } // ✅ Pass credentials (cookies, auth headers)
+        { withCredentials: true }
       );
   
       console.log("✅ Payment Order Response:", response.data);
+  
+      // Handle Razorpay Checkout
+      const { order } = response.data;
+      const options = {
+        key: rzp_test_yMMQBxrAmvtN8W,
+        amount: order.amount,
+        currency: order.currency,
+        name: "FitnessHub",
+        description: "Payment for fitness class",
+        order_id: order.id,
+        handler: async function (response) {
+          console.log("Payment Success:", response);
+          await axios.post(
+            "https://fitnesshub-5yf3.onrender.com/api/payment/verify",
+            {
+              razorpayOrderId: order.id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              bookingId: booking._id,
+            },
+            { withCredentials: true }
+          );
+          fetchBookings();
+        },
+        theme: { color: "#3399cc" },
+      };
+  
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
     } catch (error) {
       console.error("❌ Error initiating payment:", error.response?.data || error.message);
     }
   };
+  
   
   
   
