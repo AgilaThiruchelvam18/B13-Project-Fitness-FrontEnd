@@ -106,7 +106,7 @@ const UpcomingClasses = () => {
                       {cls.trainer.userName}
                     </Link>
                   </p>
-                  <p className="text-yellow-500 text-md">⭐{cls.trainer.ratings.averageRating}/5</p>
+                  {/* <p className="text-yellow-500 text-md">⭐{cls.trainer.ratings.averageRating}/5</p> */}
                 </div>
                 <div className="w-full flex flex-row justify-between">
                   <p className="text-sm text-gray-500">{cls.category}</p>

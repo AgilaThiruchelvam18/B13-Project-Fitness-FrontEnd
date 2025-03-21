@@ -27,6 +27,7 @@ const MyBookings = () => {
         (booking) => booking.status !== "Cancelled"
       );
       setBookings(activeBookings);
+      console.log("Bookings:", bookings);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to fetch bookings");
     } finally {
@@ -51,6 +52,7 @@ const MyBookings = () => {
 
       fetchBookings();
       setShowCancelConfirm(false);
+      setSelectedBooking(null);
     } catch (error) {
       console.error(
         "Error canceling booking:",
@@ -58,7 +60,58 @@ const MyBookings = () => {
       );
     }
   };
-
+  const handlePayment = async (booking) => {
+    try {
+      const response = await axios.post(
+        "https://fitnesshub-5yf3.onrender.com/api/payment/order",
+        { amount: booking.classId.price, bookingId: booking._id },
+        { withCredentials: true }
+      );
+  
+      const { order } = response.data;
+  
+      const options = {
+        key: "YOUR_RAZORPAY_KEY_ID", // Replace with actual key
+        amount: order.amount,
+        currency: order.currency,
+        name: "Fitness Hub",
+        description: `Payment for ${booking.classId.title}`,
+        order_id: order.id,
+        handler: async (response) => {
+          try {
+            await axios.post(
+              "https://fitnesshub-5yf3.onrender.com/api/payment/verify",
+              {
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                bookingId: booking._id,
+              },
+              { withCredentials: true }
+            );
+  
+            alert("Payment successful! Your booking is confirmed.");
+            fetchBookings();
+          } catch (error) {
+            console.error("Payment verification failed:", error);
+            alert("Payment failed! Please try again.");
+          }
+        },
+        prefill: {
+          name: booking.user.userName,
+          email: booking.user.email,
+        },
+        theme: { color: "#3399cc" },
+      };
+  
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.error("Error initiating payment:", error);
+      alert("Error processing payment. Please try again.");
+    }
+  };
+  
   // 🔥 Filtered Bookings List
   const filteredBookings = bookings.filter((booking) =>
     (selectedCategory === "All" || booking.category === selectedCategory) &&
@@ -129,7 +182,18 @@ const MyBookings = () => {
               </div>
 
               {/* Buttons */}
-              <div className="mt-4 flex justify-between gap-2 w-full">
+              <div className="mt-4 flex flex-col justify-between gap-2 w-full">
+                <div>
+                <button
+  className="w-full p-2 bg-green-500 text-white rounded hover:bg-green-700"
+  onClick={() => handlePayment(booking)}
+>
+  Pay Now
+</button>
+
+                </div>
+                <div className="flex flex-row">
+
                 <button
                   className="w-full p-2 bg-blue-400 text-white rounded hover:bg-blue-600"
                   onClick={() => {
@@ -151,6 +215,7 @@ const MyBookings = () => {
                 >
                   Cancel
                 </button>
+                </div>
               </div>
             </div>
           ))
@@ -162,6 +227,77 @@ const MyBookings = () => {
           )
         )}
       </div>
+
+      {/* ❗ Confirmation Modal for Canceling Booking */}
+      {showCancelConfirm &&(
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              Cancel Booking?
+            </h3>
+            <p className="text-gray-700 mb-4">
+              Are you sure you want to cancel{" "}
+              <strong>{selectedBooking.classId.title}</strong>?
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowCancelConfirm(false)}
+                className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+              >
+                No
+              </button>
+              <button
+                onClick={handleCancelBooking}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700"
+              >
+                Yes, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* 🔍 Booking Details Modal */}
+{showBookingDetails && selectedBooking && (
+  <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+    <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+      <h3 className="text-lg font-semibold text-gray-900 mb-3">
+        Booking Details
+      </h3>
+      <p className="text-gray-700">
+        <strong>Class:</strong> {selectedBooking.classId.title}
+      </p>
+      <p className="text-gray-700">
+        <strong>Trainer:</strong>{" "}
+        <Link
+          to={`/customer/CustomerDashboard/TrainerDetails/${selectedBooking.trainer._id}`}
+          className="text-blue-500 hover:underline"
+        >
+          {selectedBooking.trainer.userName}
+        </Link>
+      </p>
+      <p className="text-gray-700">
+        <strong>Category:</strong> {selectedBooking.category}
+      </p>
+      <p className="text-gray-700">
+        <strong>Duration:</strong> {selectedBooking.classId.duration} mins
+      </p>
+      <p className="text-gray-700">
+        <strong>Status:</strong> {selectedBooking.status}
+      </p>
+
+      {/* Close Button */}
+      <div className="flex justify-end mt-4">
+        <button
+          onClick={() => setShowBookingDetails(false)}
+          className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
