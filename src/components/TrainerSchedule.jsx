@@ -102,10 +102,10 @@ const handleSaveReschedule = async () => {
     const response = await fetch(
       `https://fitnesshub-5yf3.onrender.com/api/classes/${rescheduleEvent._id}/reschedule`,
       {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedSchedule),
-         withCredentials: true 
+        // method: "PUT",
+        // headers: { "Content-Type": "application/json" },
+        // body: JSON.stringify(updatedSchedule),
+        withCredentials: true 
       }
     );
 
