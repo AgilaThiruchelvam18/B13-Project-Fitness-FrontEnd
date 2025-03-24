@@ -44,96 +44,104 @@ const TrainerSchedule = () => {
   }
 
   const handleEdit = (event, selectedSlot) => { 
-    setEditModal(true);
-    setRescheduleEvent(event);
+    setEditModal(true); // Open the modal for editing
+    setRescheduleEvent(event); // Set the event to be edited
 
     console.log("Selected Slot:", selectedSlot);
     console.log("Event:", event);
 
-    if (event.schedule.scheduleType === "Recurrent" && selectedSlot) {
-        const selectedDate = selectedSlot.date && !isNaN(new Date(selectedSlot.date)) 
-        ? new Date(selectedSlot.date) 
-        : new Date(); // Ensure valid date
+    // Ensure that selectedSlot is passed
+    if (!selectedSlot) {
+        console.error("❌ No slot selected!");
+        return;
+    }
 
-    const dayName = selectedDate.toLocaleDateString("en-US", { weekday: "long" }); 
+    // Filter the clicked time slot
+    const filteredSlot = event.schedule.timeSlots.find(
+        slot => slot._id === selectedSlot._id
+    );
+
+    if (filteredSlot) {
+        // Set the state for the modal with the filtered slot
         setRecurringTimeSlots([{
-            date: selectedSlot.date && !isNaN(new Date(selectedSlot.date)) 
-                ? new Date(selectedSlot.date).toISOString() 
+            date: filteredSlot.date && !isNaN(new Date(filteredSlot.date)) 
+                ? new Date(filteredSlot.date).toISOString() 
                 : new Date().toISOString(), // Ensure valid date
-                day: selectedSlot.day || "",
-            startTime: selectedSlot.startTime || "",
-            endTime: selectedSlot.endTime || "",
-            _id: selectedSlot._id,
+            day: filteredSlot.day || "", // Set the day correctly if available
+            startTime: filteredSlot.startTime || "",
+            endTime: filteredSlot.endTime || "",
+            _id: filteredSlot._id,
         }]);
 
-        setNewStartTime(selectedSlot.startTime || "");
-        setNewEndTime(selectedSlot.endTime || "");
-
-    } else if (event.schedule.scheduleType === "One-time") {
-        setNewDate(event.schedule.oneTimeDate || "");
-        setNewDay(dayName); 
-        setNewStartTime(event.schedule.oneTimeStartTime || "");
-        setNewEndTime(event.schedule.oneTimeEndTime || "");
+        setNewStartTime(filteredSlot.startTime || "");
+        setNewEndTime(filteredSlot.endTime || "");
+    } else {
+        console.error("❌ Slot not found in the class schedule");
     }
-};
-const generateRecurringTimeSlots = (startDate, endDate, enabledDays, existingSlots) => {
-  let generatedSlots = [];
-
-  const currentDate = new Date(startDate);
-  const end = new Date(endDate);
-
-  while (currentDate <= end) {
-      let dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
-
-      if (enabledDays.includes(dayName)) {
-          let formattedDate = currentDate.toISOString().split("T")[0];
-
-          // Check if an existing slot is already present
-          let existingSlot = existingSlots.find(slot => slot.date === formattedDate);
-
-          if (existingSlot) {
-              console.log(`✅ Existing slot found for ${dayName} (${formattedDate})`);
-              generatedSlots.push(existingSlot);
-          } else {
-              console.log(`⚠️ No existing slot for ${dayName}. Using default time.`);
-              generatedSlots.push({
-                  _id: `${formattedDate}-09:00 AM`,
-                  day: dayName,
-                  date: formattedDate,
-                  startTime: "09:00 AM",
-                  endTime: "10:00 AM"
-              });
-          }
-      }
-      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
-  }
-
-  return generatedSlots;
 };
 
 
 const handleSaveReschedule = async () => {
   try {
-    if (!rescheduleEvent) return;
+    // Ensure scheduleType exists in rescheduleEvent
+    const scheduleType = rescheduleEvent.schedule?.scheduleType;
+    if (!scheduleType) {
+      console.error("❌ Schedule type is missing!");
+      return;
+    }
 
-    const updatedSchedule = {
-      scheduleType: selectedScheduleType, // "One-time" or "Recurrent"
-      date: selectedScheduleType === "One-time" ? selectedDate : null,
-      recurringTimeSlots: selectedScheduleType === "Recurrent" ? generatedTimeSlots : [],
-    };
+    // Validation: Ensure valid times and dates are provided
+    if (!newStartTime || !newEndTime) {
+      console.error("❌ Start time and end time are required!");
+      return;
+    }
 
-    console.log("📢 Sending updated schedule:", JSON.stringify(updatedSchedule, null, 2));
+    // Prepare the updated schedule object
+    const updatedSchedule = scheduleType === "Recurrent"
+      ? { recurringTimeSlots: recurringTimeSlots.map(slot => ({
+          ...slot,
+          startTime: newStartTime,  // Apply newStartTime to the selected slot
+          endTime: newEndTime,      // Apply newEndTime to the selected slot
+        })) }
+      : {
+          oneTimeDate: newDate,           // One-time event - new date
+          oneTimeStartTime: newStartTime,  // One-time event - start time
+          oneTimeEndTime: newEndTime,     // One-time event - end time
+        };
 
-    const response = await axios.put(`/api/classes/${rescheduleEvent._id}/reschedule`, updatedSchedule);
+    console.log("📢 Sending updated schedule:", updatedSchedule);
 
-    toast.success(response.data.message);
-    closeModal();
+    // Make API request to update the schedule
+    const response = await axios.put(
+      `https://fitnesshub-5yf3.onrender.com/api/classes/${rescheduleEvent._id}/reschedule`,
+      updatedSchedule,
+      {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      }
+    );
+
+    console.log("✅ Event rescheduled successfully:", response.data);
+
+    // Update local state to reflect the changes
+    setSchedule((prevSchedule) =>
+      prevSchedule.map((cls) =>
+        cls._id === rescheduleEvent._id
+          ? { ...cls, schedule: updatedSchedule }
+          : cls
+      )
+    );
+
+    // Close the modal and refresh the page (or update the UI without reload)
+    setEditModal(false);
+    window.location.reload();
   } catch (error) {
-    console.error("Error rescheduling class:", error.response?.data?.message || error.message);
-    toast.error(error.response?.data?.message || "Failed to reschedule class.");
+    console.error("❌ Error rescheduling event:", error.response?.data?.message || error.message);
   }
 };
 
+
+  
 
 
   const handleCancel = async (eventId) => {
