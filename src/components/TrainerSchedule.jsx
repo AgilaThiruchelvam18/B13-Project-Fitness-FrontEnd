@@ -105,6 +105,7 @@ const handleSaveReschedule = async () => {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedSchedule),
+         withCredentials: true 
       }
     );
 
