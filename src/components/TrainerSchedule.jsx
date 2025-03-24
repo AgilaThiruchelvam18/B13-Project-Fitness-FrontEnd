@@ -1,8 +1,10 @@
 
   import React, { useEffect, useState } from "react";
+  import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const TrainerSchedule = () => {
+
   const [schedule, setSchedule] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -14,7 +16,7 @@ const TrainerSchedule = () => {
   const [newEndTime, setNewEndTime] = useState("");
   const [recurringTimeSlots, setRecurringTimeSlots] = useState([]);
   const [newTimeSlot, setNewTimeSlot] = useState(null);
-
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -74,56 +76,64 @@ const TrainerSchedule = () => {
         setNewEndTime(event.schedule.oneTimeEndTime || "");
     }
 };
+const generateRecurringTimeSlots = (startDate, endDate, enabledDays, existingSlots) => {
+  let generatedSlots = [];
 
-const handleSaveReschedule = async () => {
-  const updatedSchedule = {
-    scheduleType: rescheduleEvent.schedule.scheduleType,
-    ...(rescheduleEvent.schedule.scheduleType === "Recurrent"
-      ? {
-          recurringTimeSlots: [
-            {
-              date: new Date().toISOString(), // Dummy date (modify if needed)
-              day: new Date().toLocaleString("en-US", { weekday: "long" }), // Get current day
-              startTime: newStartTime,
-              endTime: newEndTime,
-            },
-          ],
-        }
-      : {
-          newDate,
-          oneTimeStartTime: newStartTime,
-          oneTimeEndTime: newEndTime,
-        }),
-  };
+  const currentDate = new Date(startDate);
+  const end = new Date(endDate);
 
-  console.log("📢 Sending updated schedule:", updatedSchedule);
+  while (currentDate <= end) {
+      let dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
 
-  try {
-    const response = await fetch(
-      `https://fitnesshub-5yf3.onrender.com/api/classes/${rescheduleEvent._id}/reschedule`,
-      {
-        // method: "PUT",
-        // headers: { "Content-Type": "application/json" },
-        // body: JSON.stringify(updatedSchedule),
-        withCredentials: true 
+      if (enabledDays.includes(dayName)) {
+          let formattedDate = currentDate.toISOString().split("T")[0];
+
+          // Check if an existing slot is already present
+          let existingSlot = existingSlots.find(slot => slot.date === formattedDate);
+
+          if (existingSlot) {
+              console.log(`✅ Existing slot found for ${dayName} (${formattedDate})`);
+              generatedSlots.push(existingSlot);
+          } else {
+              console.log(`⚠️ No existing slot for ${dayName}. Using default time.`);
+              generatedSlots.push({
+                  _id: `${formattedDate}-09:00 AM`,
+                  day: dayName,
+                  date: formattedDate,
+                  startTime: "09:00 AM",
+                  endTime: "10:00 AM"
+              });
+          }
       }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to reschedule event.");
-    }
-
-    console.log("✅ Event rescheduled successfully:", data);
-    setEditModal(false);
-  } catch (error) {
-    console.error("❌ Error rescheduling event:", error.message);
+      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
   }
+
+  return generatedSlots;
 };
 
 
-  
+const handleSaveReschedule = async () => {
+  try {
+    if (!rescheduleEvent) return;
+
+    const updatedSchedule = {
+      scheduleType: selectedScheduleType, // "One-time" or "Recurrent"
+      date: selectedScheduleType === "One-time" ? selectedDate : null,
+      recurringTimeSlots: selectedScheduleType === "Recurrent" ? generatedTimeSlots : [],
+    };
+
+    console.log("📢 Sending updated schedule:", JSON.stringify(updatedSchedule, null, 2));
+
+    const response = await axios.put(`/api/classes/${rescheduleEvent._id}/reschedule`, updatedSchedule);
+
+    toast.success(response.data.message);
+    closeModal();
+  } catch (error) {
+    console.error("Error rescheduling class:", error.response?.data?.message || error.message);
+    toast.error(error.response?.data?.message || "Failed to reschedule class.");
+  }
+};
+
 
 
   const handleCancel = async (eventId) => {
@@ -154,21 +164,40 @@ const handleSaveReschedule = async () => {
       {schedule && Array.isArray(schedule) && schedule.length > 0 ? (
   schedule.map((cls, index) => (
     <div key={cls._id || index} className="mb-6 border p-4 rounded-lg shadow-md bg-white">
+{/* <h2 className="text-xl font-bold text-blue-600">
+        {cls.schedule?.startDate ? new Date(cls.schedule.startDate).toDateString() : new Date(cls.schedule.oneTimeDate).toDateString() }
+      </h2> */}
       <h2 className="text-xl font-bold text-blue-600">{cls.title}</h2>
-      <p className="text-gray-600">{cls.category} | {cls.capacity} slots</p>
-      <p className="text-gray-700">Duration: {cls.duration} mins | Price: ${cls.price}</p>
-{/* 
-      {cls.schedule && cls.schedule.timeSlots && cls.schedule.timeSlots.length > 0 ? (
-        cls.schedule.timeSlots.map((slot) => (
-          <div key={slot._id} className="mt-2 p-2 bg-gray-100 rounded">
-            <p className="text-gray-500">{slot.day} | {new Date(slot.date).toDateString()}</p>
-            <p className="text-gray-700">Time: {slot.startTime} - {slot.endTime}</p>
+
+      {/* Display Time Slots */}
+      {/* {cls.schedule?.timeSlots?.length > 0 ? (
+        cls.schedule.timeSlots.map((slot, slotIndex) => (
+          <div key={slot._id || slotIndex} className="mt-2 p-2 bg-gray-100 rounded">
+            <h3 className="text-lg font-semibold">
+              {slot.day} - {slot.date ? new Date(slot.date).toDateString() : "N/A"}
+            </h3>
+            <p className="text-gray-500">Time: {slot.startTime} - {slot.endTime}</p>
           </div>
         ))
       ) : (
-        <p className="text-gray-500">No time slots available</p>
+        <p className="text-gray-500">No time slots available.</p>
       )} */}
 
+      <p className="text-gray-600">{cls.category} | {cls.capacity} slots</p>
+      <p className="text-gray-700">Duration: {cls.duration} mins | Price: ${cls.price}</p>
+
+      {/* Display Schedule Type */}
+      <div>
+        {cls.schedule.scheduleType === "Recurrent" ? (
+          <p className="text-gray-700">Multiple Sessions</p>
+        ) : cls.schedule.scheduleType === "One-time" ? (
+          <p className="text-gray-700">
+         {new Date(cls.schedule.oneTimeDate).toDateString()} {cls.schedule.oneTimeStartTime} - {cls.schedule.oneTimeEndTime}
+          </p>
+        ) : null}
+      </div>
+
+      {/* Action Buttons */}
       <div className="flex space-x-2 mt-4">
         <button onClick={() => handleView(cls)} className="px-4 py-2 bg-blue-500 text-white rounded">View</button>
         <button onClick={() => handleReschedule(cls)} className="px-4 py-2 bg-green-500 text-white rounded">Reschedule</button>
@@ -179,6 +208,7 @@ const handleSaveReschedule = async () => {
 ) : (
   <p>No events scheduled.</p>
 )}
+
 
 
 {selectedEvent && (
