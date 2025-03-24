@@ -11,6 +11,7 @@ const UpcomingClasses = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [bookingStatus, setBookingStatus] = useState(null);
+  const [bookingLoading, setBookingLoading] = useState(null); // Track which class is being booked
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -37,6 +38,7 @@ const UpcomingClasses = () => {
   });
 
   const handleBookNow = async (cls) => {
+    setBookingLoading(cls._id); // Set the current class as loading
     try {
       const bookingData = {
         classId: cls._id,
@@ -54,6 +56,8 @@ const UpcomingClasses = () => {
       setBookingStatus({ message: response.data.message, type: "success" });
     } catch (err) {
       setBookingStatus({ message: err.response?.data?.message || "Booking failed!", type: "error" });
+    } finally {
+      setBookingLoading(null); // Reset loading state after booking
     }
   };
 
@@ -67,7 +71,7 @@ const UpcomingClasses = () => {
         </div>
       )}
 
-<div className="flex flex-wrap justify-between items-center mb-6">
+      <div className="flex flex-wrap justify-between items-center mb-6">
         <div className="flex gap-3">
           {categories.map((category) => (
             <button
@@ -91,6 +95,7 @@ const UpcomingClasses = () => {
           className="border px-4 py-2 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
         />
       </div>  
+      
       {loading && <p className="text-center text-gray-600">Loading classes...</p>}
       {error && <p className="text-center text-red-500">{error}</p>}
 
@@ -106,7 +111,6 @@ const UpcomingClasses = () => {
                       {cls.trainer.userName}
                     </Link>
                   </p>
-                  {/* <p className="text-yellow-500 text-md">⭐{cls.trainer.ratings.averageRating}/5</p> */}
                 </div>
                 <div className="w-full flex flex-row justify-between">
                   <p className="text-sm text-gray-500">{cls.category}</p>
@@ -114,8 +118,12 @@ const UpcomingClasses = () => {
                 </div>
               </div>
               <div className="mt-4 w-full">
-                <button className="w-full p-2 bg-blue-500 text-white rounded hover:bg-green-600" onClick={() => handleBookNow(cls)}>
-                  Book Now
+                <button
+                  className={`w-full p-2 rounded text-white ${bookingLoading === cls._id ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-green-600"}`}
+                  onClick={() => handleBookNow(cls)}
+                  disabled={bookingLoading === cls._id}
+                >
+                  {bookingLoading === cls._id ? "Booking..." : "Book Now"}
                 </button>
               </div>
             </div>

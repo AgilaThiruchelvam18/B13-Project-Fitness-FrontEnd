@@ -60,12 +60,16 @@ const MyBookings = () => {
       );
     }
   };
- const handlePayment = async (booking) => {
+  const [isProcessing, setIsProcessing] = useState(null); // Track processing payments
+
+  const handlePayment = async (booking) => {
     try {
       if (!booking || !booking.price || !booking._id || !booking.user?._id) {
         console.error("❌ Missing payment details:", booking);
         return;
       }
+  
+      setIsProcessing(booking._id); // Disable button for this booking
   
       console.log("📌 Sending Payment Request with Data:", {
         amount: booking.price,
@@ -85,7 +89,6 @@ const MyBookings = () => {
   
       console.log("✅ Payment Order Response:", response.data);
   
-      // Handle Razorpay Checkout
       const { order } = response.data;
       const options = {
         key: "rzp_test_yMMQBxrAmvtN8W",
@@ -96,6 +99,7 @@ const MyBookings = () => {
         order_id: order.id,
         handler: async function (response) {
           console.log("Payment Success:", response);
+  
           await axios.post(
             "https://fitnesshub-5yf3.onrender.com/api/payment/verify",
             {
@@ -105,7 +109,15 @@ const MyBookings = () => {
             },
             { withCredentials: true }
           );
-          fetchBookings();
+  
+          // Update the booking state without refresh
+          setBookings((prevBookings) =>
+            prevBookings.map((b) =>
+              b._id === booking._id ? { ...b, paymentStatus: "Paid" } : b
+            )
+          );
+  
+          setIsProcessing(null); // Reset loading state
         },
         theme: { color: "#3399cc" },
       };
@@ -114,8 +126,10 @@ const MyBookings = () => {
       razorpay.open();
     } catch (error) {
       console.error("❌ Error initiating payment:", error.response?.data || error.message);
+      setIsProcessing(null); // Reset loading state in case of failure
     }
   };
+  
   
   
   
@@ -192,20 +206,18 @@ console.log("Filtered Bookings:", filteredBookings);
 
               {/* Buttons */}
               <div className="mt-4 flex flex-col justify-between gap-2 w-full">
-              <div>
-                {booking.paymentStatus === "Paid" ? (
-                  <button className="w-full p-2 bg-gray-500 text-white rounded" disabled>
-                    Paid
-                  </button>
-                ) : (
-                  <button
-                    className="w-full p-2 bg-green-500 text-white rounded hover:bg-green-700"
-                    onClick={() => handlePayment(booking)}
-                  >
-                    Pay Now
-                  </button>
-                )}
-              </div>
+              <button
+  className={`w-full p-2 text-white rounded ${
+    booking.paymentStatus === "Paid"
+      ? "bg-gray-500 cursor-not-allowed"
+      : "bg-green-500 hover:bg-green-700"
+  }`}
+  onClick={() => handlePayment(booking)}
+  disabled={booking.paymentStatus === "Paid" || isProcessing === booking._id}
+>
+  {isProcessing === booking._id ? "Processing..." : booking.paymentStatus === "Paid" ? "Paid" : "Pay Now"}
+</button>
+
                 <div className="flex flex-row">
 
                 <button
@@ -217,9 +229,9 @@ console.log("Filtered Bookings:", filteredBookings);
                 >
                   View
                 </button>
-                <button className="w-full p-2 bg-green-400 text-white rounded hover:bg-yellow-600">
+                {/* <button className="w-full p-2 bg-green-400 text-white rounded hover:bg-yellow-600">
                   Reschedule
-                </button>
+                </button> */}
                 <button
                   onClick={() => {
                     setSelectedBooking(booking);
@@ -298,7 +310,9 @@ console.log("Filtered Bookings:", filteredBookings);
       <p className="text-gray-700">
         <strong>Status:</strong> {selectedBooking.status}
       </p>
-
+      <p className="text-gray-700">
+        <strong>paymentStatus:</strong> {selectedBooking.paymentStatus}
+      </p>
       {/* Close Button */}
       <div className="flex justify-end mt-4">
         <button

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-// Categories & Status Filters
 const categories = ["All", "Cardio", "Yoga", "Strength Training", "Zumba", "Meditation"];
 const statusFilters = ["All", "Active", "Completed", "Cancelled"];
 
@@ -11,8 +10,8 @@ const BookingHistory = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [reviews, setReviews] = useState({});
 
-  // Fetch Booking History from API
   useEffect(() => {
     const fetchBookingHistory = async () => {
       try {
@@ -25,17 +24,83 @@ const BookingHistory = () => {
     fetchBookingHistory();
   }, []);
 
-  // Apply Category, Status, and Search Filters
-  const filteredHistory = bookingHistory.filter((booking) => {
-    const categoryMatch = selectedCategory === "All" || booking.category.toLowerCase() === selectedCategory.toLowerCase();
-    const statusMatch = selectedStatus === "All" || booking.status === selectedStatus;
-    const searchMatch = booking.classId.title.toLowerCase().includes(searchQuery.toLowerCase());
-    return categoryMatch && statusMatch && searchMatch;
-  });
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/trainer-auth/profile", { withCredentials: true });
+  console.log(res.data.reviews);
+        const reviewsData = res.data.reviews.reduce((acc, review) => {
+          acc[review.booking] = {
+            rating: review.rating,
+            comment: review.comment,
+            submitted: true,
+          };
+          return acc;
+        }, {});
+  
+        setReviews(reviewsData);
+      } catch (err) {
+        console.error("Error fetching reviews:", err);
+      }
+    };
+  
+    fetchReviews();
+  }, []);
+  
+
+  const handleReviewSubmit = async (bookingId, trainerId) => {
+    try {
+      const { rating, comment } = reviews[bookingId] || {};
+      if (!rating || !comment) {
+        alert("Please provide a rating and review");
+        return;
+      }
+  
+      // Post the review to backend
+      const res = await axios.post(
+        "https://fitnesshub-5yf3.onrender.com/api/reviews",
+        { bookingId, trainerId, rating, comment },
+        { withCredentials: true }
+      );
+  
+      // Ensure UI updates immediately
+      setReviews((prevReviews) => ({
+        ...prevReviews,
+        [bookingId]: { 
+          rating: res.data.review.rating, 
+          comment: res.data.review.comment, 
+          submitted: true // This ensures input fields disappear
+        },
+      }));
+  
+      alert("Review submitted successfully!");
+    } catch (err) {
+      console.error("Error submitting review:", err);
+      alert("Failed to submit review");
+    }
+  };
+  
+  
+  // Ensure reviews update dynamically
+  const handleReviewChange = (bookingId, field, value) => {
+    setReviews((prevReviews) => ({
+      ...prevReviews,
+      [bookingId]: {
+        ...prevReviews[bookingId],
+        [field]: value,
+      },
+    }));
+  };
+  
+
+  const filteredBookings = bookingHistory.filter(booking => 
+    (selectedCategory === "All" || booking.category === selectedCategory) &&
+    (selectedStatus === "All" || booking.status === selectedStatus) &&
+    (booking.classId?.title?.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 rounded-lg shadow-lg bg-gray-50 h-screen overflow-y-auto">
-      {/* Header & Search Box */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Booking History</h2>
         <input
@@ -47,9 +112,7 @@ const BookingHistory = () => {
         />
       </div>
 
-      {/* Filter Container */}
       <div className="flex justify-between items-center mb-6">
-        {/* Left: Category Filter Buttons */}
         <div className="flex flex-wrap gap-3">
           {categories.map((category) => (
             <button
@@ -63,63 +126,74 @@ const BookingHistory = () => {
             </button>
           ))}
         </div>
-
-        {/* Right: Status Filter Dropdown */}
         <select
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
           className="px-4 py-2 border rounded-md text-sm font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none"
         >
           {statusFilters.map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
+            <option key={status} value={status}>{status}</option>
           ))}
         </select>
       </div>
 
-      {/* Booking History List */}
       <div className="grid grid-cols-1 gap-4 p-4">
-        {filteredHistory.length > 0 ? (
-          filteredHistory.map((booking) => (
-            <div
-              key={booking._id}
-              className="flex flex-row justify-between bg-white p-4 rounded-lg shadow-md items-center border-l-4"
-              style={{
-                borderColor:
-                  booking.status === "Completed" ? "#10B981" : booking.status === "Cancelled" ? "#EF4444" : "#3B82F6",
-              }}
-            >
-              {/* Left: Booking Details */}
-              <div className="flex flex-col px-4">
-                <p className="text-gray-600 font-semibold">{booking.classId.title}</p>
-                <p className="text-sm text-gray-500">
-                  Trainer:{" "}
-                  <Link to={`/customer/CustomerDashboard/TrainerDetails/${booking.trainer._id}`} className="text-blue-500 hover:underline">
-                    {booking.trainer.userName}
-                  </Link>
-                </p>
-                <p className="text-sm text-gray-500">Duration: {booking.classId.duration} mins</p>
-                <p className="text-sm text-gray-500">Category: {booking.category}</p>
-              </div>
-
-              {/* Middle: Status Badge */}
-              <div
-                className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                  booking.status === "Completed"
-                    ? "bg-green-100 text-green-700"
-                    : booking.status === "Cancelled"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-blue-100 text-blue-700"
-                }`}
-              >
-                {booking.status}
-              </div>
+        {filteredBookings.map((booking) => (
+          <div key={booking._id} className="bg-white p-4 rounded-lg shadow-md border-l-4" style={{
+              borderColor: booking.status === "Completed" ? "#10B981" : booking.status === "Cancelled" ? "#EF4444" : "#3B82F6",
+            }}>
+            <div className="flex flex-col">
+              <p className="text-gray-600 font-semibold">{booking.classId?.title || "Unknown Class"}</p>
+              <p className="text-sm text-gray-500">
+                Trainer: <Link to={`/trainer/${booking.trainer?._id}`} className="text-blue-500 hover:underline">
+                  {booking.trainer?.userName || "Unknown Trainer"}
+                </Link>
+              </p>
+              <p className="text-sm text-gray-500">Duration: {booking.classId?.duration || "N/A"} mins</p>
+              <p className="text-sm text-gray-500">Category: {booking.category}</p>
             </div>
-          ))
-        ) : (
-          <p className="text-center text-gray-600">No history available.</p>
-        )}
+
+            {booking.status === "Completed" && (
+  <div className="mt-4">
+    <h3 className="text-lg font-semibold">Review</h3>
+    {reviews[booking._id]?.submitted ? (
+      <div className="mt-2 p-3 bg-gray-100 rounded-md">
+        <p className="font-semibold">Rating: {reviews[booking._id].rating} ⭐</p>
+        <p>{reviews[booking._id].comment}</p>
+      </div>
+    ) : (
+      <div className="mt-2">
+        <select
+          value={reviews[booking._id]?.rating || ""}
+          onChange={(e) => handleReviewChange(booking._id, "rating", e.target.value)}
+          className="border px-2 py-1 rounded-md mr-2"
+        >
+          <option value="">Rate</option>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <option key={star} value={star}>{star} ⭐</option>
+          ))}
+        </select>
+        <input
+          type="text"
+          placeholder="Write a review..."
+          value={reviews[booking._id]?.comment || ""}
+          onChange={(e) => handleReviewChange(booking._id, "comment", e.target.value)}
+          className="border px-4 py-2 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
+        />
+        <button
+          onClick={() => handleReviewSubmit(booking._id, booking.trainer?._id)}
+          className="ml-2 bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600"
+        >
+          Submit
+        </button>
+      </div>
+    )}
+  </div>
+)}
+
+
+          </div>
+        ))}
       </div>
     </div>
   );

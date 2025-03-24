@@ -123,7 +123,6 @@ const Classes = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Ensure schedule exists
     if (!newClass.schedule) {
         console.error("Error: Schedule is undefined.");
         return;
@@ -144,6 +143,10 @@ const Classes = () => {
 
             if (Array.isArray(slots) && slots.length > 0) {
                 slots.forEach(slot => {
+                    if (!slot.startTime || !slot.endTime) {
+                        alert(`Please provide valid time slots for ${day}.`);
+                        return;
+                    }
                     formattedTimeSlots.push({
                         date: newClass.schedule.startDate, // Placeholder, update logic if needed
                         day,
@@ -159,7 +162,6 @@ const Classes = () => {
             return;
         }
 
-        // Assign transformed timeSlots
         newClass.schedule.timeSlots = formattedTimeSlots;
     }
 
@@ -184,6 +186,7 @@ const Classes = () => {
 };
 
 
+
   
 
   return (
@@ -198,7 +201,7 @@ const Classes = () => {
             <option key={cat} value={cat}>{cat}</option>
           ))}
         </select>
-        <input type="number" name="duration" placeholder="Duration (minutes)" value={newClass.duration} onChange={handleInputChange} className="border p-2 rounded w-full" required />
+        {/* <input type="number" name="duration" placeholder="Duration (minutes)" value={newClass.duration} onChange={handleInputChange} className="border p-2 rounded w-full" required /> */}
         <input type="number" name="price" placeholder="Price ($)" value={newClass.price} onChange={handleInputChange} className="border p-2 rounded w-full" required />
         <input type="number" name="capacity" placeholder="Capacity" value={newClass.capacity} onChange={handleInputChange} className="border p-2 rounded w-full" required />
         <select name="scheduleType" value={newClass.schedule.scheduleType} onChange={handleScheduleTypeChange} className="border p-2 rounded w-full">
