@@ -97,12 +97,12 @@ const SignupForm = () => {
               <Field type="text" name="fitnessGoal" placeholder="Fitness Goal" className="border p-2 rounded mt-1" />
               <ErrorMessage name="fitnessGoal" component="div" className="text-red-500 text-sm" />
 
-              <input
+              {/* <input
                 type="file"
                 accept="image/*"
                 onChange={(event) => setFieldValue("profilePicture", event.currentTarget.files[0])}
                 className="border p-2 rounded mt-1"
-              />
+              /> */}
 
               <button type="submit" disabled={isSubmitting} className="mt-4 bg-blue-500 text-white py-2 rounded">
                 {isSubmitting ? "Registering..." : "Sign Up"}
