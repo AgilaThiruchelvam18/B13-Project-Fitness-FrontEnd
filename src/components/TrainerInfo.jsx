@@ -53,7 +53,10 @@ const TrainerProfile = () => {
 
     fetchProfile();
   }, []);
-
+  // const imageUrl = trainer.mediaUploads[0]?.url.startsWith("http")
+  // ? trainer.mediaUploads[0]?.url
+  // : `${backendURL}${trainer.mediaUploads[0]?.url}`;
+   
   return (
     <div className="w-full h-screen flex flex-col bg-gray-100 p-4 gap-6">
       <div className="w-full flex gap-6">
@@ -62,11 +65,14 @@ const TrainerProfile = () => {
           {/* Trainer Info */}
           <div className="flex items-center gap-6">
             {trainer.mediaUploads && trainer.mediaUploads.length > 0 ? (
-    <img
-      src={trainer.mediaUploads[0].url} // Show the first uploaded image
-      alt="Trainer Media"
-      className="w-24 h-24 rounded-full object-cover"
-    />
+    
+   <img
+   src={trainer.mediaUploads[0]?.url.startsWith("http")
+    ? trainer.mediaUploads[0]?.url
+    : `https://fitnesshub-5yf3.onrender.com/${trainer.mediaUploads[0]?.url}`}
+   alt="Trainer Media"
+   className="w-24 h-24 rounded-full object-cover"
+ />
   ) : (
               <div className="w-24 h-24 bg-gray-300 flex items-center justify-center rounded-full">
                 <span className="text-gray-600">No Image</span>
