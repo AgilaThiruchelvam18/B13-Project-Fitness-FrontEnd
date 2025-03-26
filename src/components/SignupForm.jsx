@@ -44,17 +44,17 @@ const SignupForm = () => {
           validationSchema={validationSchema}
           onSubmit={async (values, { setSubmitting }) => {
             try {
-              const formData = new FormData();
-              Object.keys(values).forEach((key) => {
-                formData.append(key, values[key]);
-              });
+              // const formData = new FormData();
+              // Object.keys(values).forEach((key) => {
+              //   formData.append(key, values[key]);
+              // });
               // if (profilePicture) {
               //   formData.append("profilePicture", profilePicture);
               // }
 
               const response = await axios.post(
                 "https://fitnesshub-5yf3.onrender.com/api/user-auth/register",
-                formData,
+                values,
                 { withCredentials: true }
               );
 
