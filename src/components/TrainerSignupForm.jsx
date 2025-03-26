@@ -48,20 +48,29 @@ const TrainerSignup = () => {
           onSubmit={async (values, { setSubmitting }) => {
             try {
               const formData = new FormData();
+          
+              // Append media uploads correctly
+              values.mediaUploads.forEach((file) => {
+                formData.append("mediaUploads", file);
+              });
+          
+              // Append other form fields, skipping mediaUploads to prevent duplication
               Object.entries(values).forEach(([key, value]) => {
-                if (Array.isArray(value)) {
-                  value.forEach((item) => formData.append(`${key}[]`, item));
-                } else {
-                  formData.append(key, value);
+                if (key !== "mediaUploads") { // Prevent adding mediaUploads again
+                  if (Array.isArray(value)) {
+                    value.forEach((item) => formData.append(`${key}[]`, item));
+                  } else {
+                    formData.append(key, value);
+                  }
                 }
               });
-
+          
               const response = await axios.post(
                 "https://fitnesshub-5yf3.onrender.com/api/trainer-auth/register",
                 formData,
                 { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
               );
-
+          
               setMessage(response.data.message);
               setTimeout(() => navigate("/trainer/login"), 2000);
             } catch (error) {
@@ -70,6 +79,7 @@ const TrainerSignup = () => {
               setSubmitting(false);
             }
           }}
+          
         >
           {({ isSubmitting, setFieldValue }) => (
             <Form className="flex flex-col">

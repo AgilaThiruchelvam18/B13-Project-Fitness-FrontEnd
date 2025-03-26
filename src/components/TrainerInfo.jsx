@@ -61,13 +61,13 @@ const TrainerProfile = () => {
         <div className="w-2/3 bg-white shadow-lg rounded-lg flex flex-col p-6">
           {/* Trainer Info */}
           <div className="flex items-center gap-6">
-            {trainer.profilePicture ? (
-              <img
-                src={trainer.profilePicture}
-                alt="Profile"
-                className="w-24 h-24 rounded-full object-cover"
-              />
-            ) : (
+            {trainer.mediaUploads && trainer.mediaUploads.length > 0 ? (
+    <img
+      src={trainer.mediaUploads[0].url} // Show the first uploaded image
+      alt="Trainer Media"
+      className="w-24 h-24 rounded-full object-cover"
+    />
+  ) : (
               <div className="w-24 h-24 bg-gray-300 flex items-center justify-center rounded-full">
                 <span className="text-gray-600">No Image</span>
               </div>
@@ -127,7 +127,7 @@ const TrainerProfile = () => {
                     className="p-4 border rounded-md bg-gray-50 shadow-md"
                   >
                     <div className="flex items-center justify-between">
-                      <p className="font-semibold">{review.user}</p>
+                      <p className="font-semibold">{review.user.userName}</p>
                       <p className="text-yellow-500">⭐ {review.rating || "N/A"}</p>
                     </div>
                     <p className="text-gray-600 mt-2">{review.comment}</p>

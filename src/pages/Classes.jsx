@@ -10,7 +10,6 @@ const Classes = () => {
     title: "",
     description: "",
     category: "",
-    duration: "",
     price: "",
     capacity: "",
     schedule: {
@@ -123,6 +122,7 @@ const Classes = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Ensure schedule exists
     if (!newClass.schedule) {
         console.error("Error: Schedule is undefined.");
         return;
@@ -143,10 +143,6 @@ const Classes = () => {
 
             if (Array.isArray(slots) && slots.length > 0) {
                 slots.forEach(slot => {
-                    if (!slot.startTime || !slot.endTime) {
-                        alert(`Please provide valid time slots for ${day}.`);
-                        return;
-                    }
                     formattedTimeSlots.push({
                         date: newClass.schedule.startDate, // Placeholder, update logic if needed
                         day,
@@ -162,6 +158,7 @@ const Classes = () => {
             return;
         }
 
+        // Assign transformed timeSlots
         newClass.schedule.timeSlots = formattedTimeSlots;
     }
 
@@ -177,7 +174,7 @@ const Classes = () => {
         console.log("Response:", response.data);
         fetchClasses();
         setNewClass({ 
-            title: "", description: "", category: "", duration: "", price: "", capacity: "",
+            title: "", description: "", category: "", price: "", capacity: "",
             schedule: { scheduleType: "One-time", oneTimeDate: "", oneTimeStartTime: "", oneTimeEndTime: "", enabledDays: [], timeSlots: {}, blockedDates: [], startDate: "", endDate: "" }
         });
     } catch (error) {
@@ -185,7 +182,18 @@ const Classes = () => {
     }
 };
 
+const disablePastDate = () => {
+  const today = new Date();
+  today.setDate(today.getDate()); // Ensure we're using today's date
+  return today.toISOString().split("T")[0]; // Format to YYYY-MM-DD
+};
 
+const disablePastTime = (selectedDate, selectedTime) => {
+  const today = new Date();
+  const selectedDateTime = new Date(`${selectedDate}T${selectedTime}`);
+  
+  return selectedDateTime <= today;
+};
 
   
 
@@ -210,29 +218,54 @@ const Classes = () => {
         </select>
         {newClass.schedule.scheduleType === "One-time" ? (
           <>
-            <input type="date" name="oneTimeDate" value={newClass.schedule.oneTimeDate} onChange={handleInputChange} className="border p-2 rounded w-full" required />
-            <input type="time" name="oneTimeStartTime" value={newClass.schedule.oneTimeStartTime} onChange={handleInputChange} className="border p-2 rounded w-full" required />
-            <input type="time" name="oneTimeEndTime" value={newClass.schedule.oneTimeEndTime} onChange={handleInputChange} className="border p-2 rounded w-full" required />
-          </>
+          <input 
+              type="date" 
+              name="oneTimeDate" 
+              value={newClass.schedule.oneTimeDate} 
+              onChange={handleInputChange} 
+              className="border p-2 rounded w-full" 
+              required 
+              min={disablePastDate()}
+            />
+            <input 
+              type="time" 
+              name="oneTimeStartTime" 
+              value={newClass.schedule.oneTimeStartTime} 
+              onChange={handleInputChange} 
+              className="border p-2 rounded w-full" 
+              required 
+              min={newClass.schedule.oneTimeDate === disablePastDate() ? new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""}
+            />
+            <input 
+              type="time" 
+              name="oneTimeEndTime" 
+              value={newClass.schedule.oneTimeEndTime} 
+              onChange={handleInputChange} 
+              className="border p-2 rounded w-full" 
+              required 
+            />
+             </>
         ) : (
           <>
             <div>
             <input 
-      type="date" 
-      name="startDate" 
-      value={newClass.schedule.startDate} 
-      onChange={handleInputChange} 
-      className="border p-2 rounded w-full m-1" 
-      required 
-    />
-    <input 
-      type="date" 
-      name="endDate" 
-      value={newClass.schedule.endDate} 
-      onChange={handleInputChange} 
-      className="border p-2 rounded w-full m-1" 
-      required 
-    />
+                type="date" 
+                name="startDate" 
+                value={newClass.schedule.startDate} 
+                onChange={handleInputChange} 
+                className="border p-2 rounded w-full m-1" 
+                required 
+                min={disablePastDate()}
+              />
+              <input 
+                type="date" 
+                name="endDate" 
+                value={newClass.schedule.endDate} 
+                onChange={handleInputChange} 
+                className="border p-2 rounded w-full m-1" 
+                required 
+                min={disablePastDate()}
+              />
               <p className="font-semibold">Select Available Days:</p>
               {daysOfWeek.map((day) => (
                 <button key={day} type="button" onClick={() => toggleDaySelection(day)} className={`p-2 m-1 rounded ${newClass.schedule.enabledDays.includes(day) ? "bg-green-500 text-white" : "bg-gray-300"}`}>{day}</button>

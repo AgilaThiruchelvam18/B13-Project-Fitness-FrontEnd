@@ -1,10 +1,8 @@
 
   import React, { useEffect, useState } from "react";
-  import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const TrainerSchedule = () => {
-
   const [schedule, setSchedule] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -16,7 +14,7 @@ const TrainerSchedule = () => {
   const [newEndTime, setNewEndTime] = useState("");
   const [recurringTimeSlots, setRecurringTimeSlots] = useState([]);
   const [newTimeSlot, setNewTimeSlot] = useState(null);
-  const navigate = useNavigate();
+  const [updatedSlot, setUpdatedSlot] = useState({});
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -35,7 +33,21 @@ const TrainerSchedule = () => {
     fetchSchedule();
   }, []);
   
-
+  const disablePastDate = () => {
+    const today = new Date();
+    today.setDate(today.getDate()); // Ensure we're using today's date
+    return today.toISOString().split("T")[0]; // Format to YYYY-MM-DD
+  };
+  
+  const disablePastTime = (selectedDate, selectedTime) => {
+    const today = new Date();
+    const selectedDateTime = new Date(`${selectedDate}T${selectedTime}`);
+    
+    return selectedDateTime <= today;
+  };
+  
+    
+  
   const handleView = (event) => {
     setSelectedEvent(event);
   };
@@ -44,104 +56,127 @@ const TrainerSchedule = () => {
   }
 
   const handleEdit = (event, selectedSlot) => { 
-    setEditModal(true); // Open the modal for editing
-    setRescheduleEvent(event); // Set the event to be edited
+    setEditModal(true);
+    setRescheduleEvent(event);
 
     console.log("Selected Slot:", selectedSlot);
     console.log("Event:", event);
 
-    // Ensure that selectedSlot is passed
-    if (!selectedSlot) {
-        console.error("❌ No slot selected!");
-        return;
-    }
+    const scheduleType = event.schedule?.scheduleType;
 
-    // Filter the clicked time slot
-    const filteredSlot = event.schedule.timeSlots.find(
-        slot => slot._id === selectedSlot._id
-    );
+    if (scheduleType === "Recurrent") {
+        const selectedDate = selectedSlot?.date ? new Date(selectedSlot.date) : new Date();
 
-    if (filteredSlot) {
-        // Set the state for the modal with the filtered slot
-        setRecurringTimeSlots([{
-            date: filteredSlot.date && !isNaN(new Date(filteredSlot.date)) 
-                ? new Date(filteredSlot.date).toISOString() 
-                : new Date().toISOString(), // Ensure valid date
-            day: filteredSlot.day || "", // Set the day correctly if available
-            startTime: filteredSlot.startTime || "",
-            endTime: filteredSlot.endTime || "",
-            _id: filteredSlot._id,
-        }]);
-
-        setNewStartTime(filteredSlot.startTime || "");
-        setNewEndTime(filteredSlot.endTime || "");
-    } else {
-        console.error("❌ Slot not found in the class schedule");
+        setNewDate(selectedDate.toISOString().split("T")[0]); 
+        setNewDay(selectedDate.toLocaleDateString("en-US", { weekday: "long" }));
+        setNewStartTime(selectedSlot?.startTime || "");
+        setNewEndTime(selectedSlot?.endTime || "");   
+            setRecurringTimeSlots([{
+                id:selectedSlot.id,
+                date: selectedDate.toISOString().split("T")[0],
+                day: selectedDate.toLocaleDateString("en-US", { weekday: "long" }),
+                startTime: selectedSlot?.startTime || "", 
+                endTime: selectedSlot?.endTime || "",
+            }]);
+        
+    } 
+    else if (scheduleType === "One-time") {
+        const eventDate = event.schedule?.oneTimeDate ? new Date(event.schedule.oneTimeDate) : new Date();
+        
+        setNewDate(eventDate.toISOString().split("T")[0]);
+        setNewDay(eventDate.toLocaleDateString("en-US", { weekday: "long" }));
+        setNewStartTime(event.schedule?.oneTimeStartTime || "");
+        setNewEndTime(event.schedule?.oneTimeEndTime || "");
     }
 };
+
+
 
 
 const handleSaveReschedule = async () => {
   try {
-    // Ensure scheduleType exists in rescheduleEvent
-    const scheduleType = rescheduleEvent.schedule?.scheduleType;
-    if (!scheduleType) {
-      console.error("❌ Schedule type is missing!");
+    let payload = {}; // Declare payload at the top
+
+    // 🔹 Handle One-time Event Rescheduling
+    if (rescheduleEvent.schedule.scheduleType === "One-time") {
+      if (!newDate || !newDay || !newStartTime || !newEndTime) {
+        alert("Please select a date and time slot before rescheduling.");
+        return;
+      }
+
+      payload = {
+        scheduleType: "One-time",
+        newDate: new Date(newDate).toISOString(),
+        newDay: newDay,
+        newTimeSlot: {
+          startTime: newStartTime,
+          endTime: newEndTime,
+        },
+      };
+    }
+    // 🔹 Handle Recurrent Event Rescheduling
+    else if (rescheduleEvent.schedule.scheduleType === "Recurrent") {
+      console.log("Recurring Time Slots:", recurringTimeSlots);
+
+      const formattedSlots = recurringTimeSlots
+        .map((slot) => {
+          if (!slot.date || !slot.day) return null;
+
+          const validDate = new Date(slot.date);
+          if (isNaN(validDate.getTime())) return null;
+
+          return {
+            id: slot.id,  // Ensure `_id` is present
+            date: validDate.toISOString(),
+            day: validDate.toLocaleDateString("en-US", { weekday: "long" }),
+            startTime: newStartTime || slot.startTime,
+            endTime: newEndTime || slot.endTime,
+          };
+        })
+        .filter(Boolean);
+
+      if (formattedSlots.length === 0) {
+        alert("Recurrent schedule must have at least one valid time slot.");
+        return;
+      }
+
+      // 🔹 Ensure updatedSlot has `_id` before using it
+      const updatedSlot = formattedSlots.find(slot => slot.id);
+
+      if (!updatedSlot) {
+        alert("Error: No valid time slot found for update.");
+        return;
+      }
+
+      payload = {
+        scheduleType: "Recurrent",
+        recurringTimeSlots: formattedSlots,
+        updatedSlot, // Ensure this is well-defined
+      };
+    } else {
+      alert("Invalid schedule type.");
       return;
     }
 
-    // Validation: Ensure valid times and dates are provided
-    if (!newStartTime || !newEndTime) {
-      console.error("❌ Start time and end time are required!");
-      return;
-    }
+    console.log("🚀 Sending reschedule request:", JSON.stringify(payload, null, 2));
 
-    // Prepare the updated schedule object
-    const updatedSchedule = scheduleType === "Recurrent"
-      ? { recurringTimeSlots: recurringTimeSlots.map(slot => ({
-          ...slot,
-          startTime: newStartTime,  // Apply newStartTime to the selected slot
-          endTime: newEndTime,      // Apply newEndTime to the selected slot
-        })) }
-      : {
-          oneTimeDate: newDate,           // One-time event - new date
-          oneTimeStartTime: newStartTime,  // One-time event - start time
-          oneTimeEndTime: newEndTime,     // One-time event - end time
-        };
-
-    console.log("📢 Sending updated schedule:", updatedSchedule);
-
-    // Make API request to update the schedule
     const response = await axios.put(
       `https://fitnesshub-5yf3.onrender.com/api/classes/${rescheduleEvent._id}/reschedule`,
-      updatedSchedule,
-      {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      }
+      payload,
+      { withCredentials: true }
     );
 
-    console.log("✅ Event rescheduled successfully:", response.data);
+    console.log("✅ Reschedule Response:", response.data);
+    alert("Class rescheduled successfully!");
 
-    // Update local state to reflect the changes
-    setSchedule((prevSchedule) =>
-      prevSchedule.map((cls) =>
-        cls._id === rescheduleEvent._id
-          ? { ...cls, schedule: updatedSchedule }
-          : cls
-      )
-    );
-
-    // Close the modal and refresh the page (or update the UI without reload)
     setEditModal(false);
-    window.location.reload();
+    window.location.reload(); // Refresh to reflect changes
+
   } catch (error) {
-    console.error("❌ Error rescheduling event:", error.response?.data?.message || error.message);
+    console.error("❌ Error rescheduling event:", error.response?.data || error.message);
+    alert("Failed to reschedule class. Please try again.");
   }
 };
-
-
-  
 
 
   const handleCancel = async (eventId) => {
@@ -162,62 +197,44 @@ const handleSaveReschedule = async () => {
   if (loading) return <div className="text-center">Loading schedule...</div>;
   console.log("selectedEvent", selectedEvent);
   console.log("rescheduleEvent", rescheduleEvent);
-  console.log("recurringTimeSlots", recurringTimeSlots);
-  console.log("schedule", schedule);
-
+ 
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-semibold mb-4">Class Schedule</h1>
-      {schedule && Array.isArray(schedule) && schedule.length > 0 ? (
-  schedule.map((cls, index) => (
-    <div key={cls._id || index} className="mb-6 border p-4 rounded-lg shadow-md bg-white">
-{/* <h2 className="text-xl font-bold text-blue-600">
-        {cls.schedule?.startDate ? new Date(cls.schedule.startDate).toDateString() : new Date(cls.schedule.oneTimeDate).toDateString() }
-      </h2> */}
-      <h2 className="text-xl font-bold text-blue-600">{cls.title}</h2>
-
-      {/* Display Time Slots */}
-      {/* {cls.schedule?.timeSlots?.length > 0 ? (
-        cls.schedule.timeSlots.map((slot, slotIndex) => (
-          <div key={slot._id || slotIndex} className="mt-2 p-2 bg-gray-100 rounded">
-            <h3 className="text-lg font-semibold">
-              {slot.day} - {slot.date ? new Date(slot.date).toDateString() : "N/A"}
-            </h3>
-            <p className="text-gray-500">Time: {slot.startTime} - {slot.endTime}</p>
+      {schedule.length === 0 ? (
+        <p>No events scheduled.</p>
+      ) : (
+        schedule.map(({ date, events }) => (
+          <div key={date} className="mb-6">
+            <h2 className="text-xl font-bold text-blue-600">{new Date(date).toDateString()}</h2>
+            <div className="mt-2 space-y-4">
+              {events.map((cls) => (
+                <div key={cls._id} className="border p-4 rounded-lg shadow-md bg-white">
+                  <h3 className="text-lg font-semibold">{cls.title}</h3>
+                  <p className="text-gray-600">{cls.category} | {cls.capacity} slots</p>
+                  <p className="text-gray-700">Duration: {cls.duration} mins | Price: ${cls.price}</p>
+                  <p className="text-gray-500">Time: {cls.schedule.scheduleType === "One-time" ? 
+                    `${cls.schedule.oneTimeStartTime} - ${cls.schedule.oneTimeEndTime}` : "Multiple Sessions"}
+                  </p>
+                  {cls.schedule.scheduleType !== "One-time" && cls.schedule.recurringTimes && (
+                    <div className="grid grid-cols-4 gap-2 mt-2">
+                      {cls.schedule.recurringTimes.map((time, index) => (
+                        <span key={index} className="bg-gray-200 px-2 py-1 rounded text-sm">{time}</span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex space-x-2 mt-4">
+                    <button onClick={() => handleView(cls)} className="px-4 py-2 bg-blue-500 text-white rounded">View</button>
+                    <button onClick={() => handleReschedule(cls)} className="px-4 py-2 bg-green-500 text-white rounded">Reschedule</button>
+                    <button onClick={() => handleCancel(cls._id)} className="px-4 py-2 bg-red-500 text-white rounded">Cancel</button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ))
-      ) : (
-        <p className="text-gray-500">No time slots available.</p>
-      )} */}
-
-      <p className="text-gray-600">{cls.category} | {cls.capacity} slots</p>
-      <p className="text-gray-700">Duration: {cls.duration} mins | Price: ${cls.price}</p>
-
-      {/* Display Schedule Type */}
-      <div>
-        {cls.schedule.scheduleType === "Recurrent" ? (
-          <p className="text-gray-700">Multiple Sessions</p>
-        ) : cls.schedule.scheduleType === "One-time" ? (
-          <p className="text-gray-700">
-         {new Date(cls.schedule.oneTimeDate).toDateString()} {cls.schedule.oneTimeStartTime} - {cls.schedule.oneTimeEndTime}
-          </p>
-        ) : null}
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex space-x-2 mt-4">
-        <button onClick={() => handleView(cls)} className="px-4 py-2 bg-blue-500 text-white rounded">View</button>
-        <button onClick={() => handleReschedule(cls)} className="px-4 py-2 bg-green-500 text-white rounded">Reschedule</button>
-        <button onClick={() => handleCancel(cls._id)} className="px-4 py-2 bg-red-500 text-white rounded">Cancel</button>
-      </div>
-    </div>
-  ))
-) : (
-  <p>No events scheduled.</p>
-)}
-
-
+      )}
 
 {selectedEvent && (
   <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
@@ -228,63 +245,71 @@ const handleSaveReschedule = async () => {
       <p>Duration: {selectedEvent.duration} mins</p>
       <p>Price: ${selectedEvent.price}</p>
 
-      {/* Recurrent Event Handling */}
-      {selectedEvent.schedule &&
-      selectedEvent.schedule.scheduleType === "Recurrent" &&
-      selectedEvent.schedule.timeSlots &&
-      selectedEvent.schedule.startDate &&
-      selectedEvent.schedule.endDate ? (
-        <div className="w-full grid grid-cols-4 gap-2 mt-2">
-          {(() => {
-            const startDate = new Date(selectedEvent.schedule.startDate);
-            const endDate = new Date(selectedEvent.schedule.endDate);
-            const enabledDays = selectedEvent.schedule.enabledDays || []; // Ensure enabledDays is an array
-            const sessions = [];
+      {selectedEvent.schedule.scheduleType !== "One-time" &&
+        selectedEvent.schedule.timeSlots &&
+        selectedEvent.schedule.startDate &&
+        selectedEvent.schedule.endDate ? (
+          <div className="w-full grid grid-cols-4 gap-2 mt-2">
+            {(() => {
+               const startDate = new Date(selectedEvent.schedule.startDate);
+               const endDate = new Date(selectedEvent.schedule.endDate);
+               const enabledDays = selectedEvent.schedule.enabledDays || [];
+               const sessions = [];
+           
+               let currentDate = new Date(startDate);
+               while (currentDate <= endDate) {
+                 const dateString = currentDate.toLocaleDateString("en-CA");
+                 const dayName = currentDate.toLocaleDateString("en-US", { weekday: "long" });
+           
+                 if (enabledDays.includes(dayName)) {
+                   const daySlots = selectedEvent.schedule.timeSlots.filter(
+                     (slot) => slot.day === dayName
+                   );
+           
+                   daySlots.forEach((slot) => {
+                     // Ensure unique keys and prevent duplicates
+                     const sessionKey = `${dateString}-${slot.startTime}-${slot.endTime}`;
+           
+                     if (!sessions.some((session) => session.key === sessionKey)) {
+                       sessions.push(
+                         <div key={sessionKey} className="w-5/6 flex flex-row justify-between">
+                           <div className="bg-gray-200 px-4 py-1 rounded text-sm">
+                             <p>{dateString}</p>
+                             <p>{slot.startTime} - {slot.endTime}</p>
+                           </div>
+                         </div>
+                       );
+                     }
+                   });
+                 }
+           
+                 currentDate.setDate(currentDate.getDate() + 1);
+               }
+           
 
-            let currentDate = new Date(startDate);
-            while (currentDate <= endDate) {
-              const dayName = currentDate.toLocaleDateString("en-US", { weekday: "long" });
-
-              // Check if current day is in enabledDays
-              if (enabledDays.includes(dayName)) {
-                // Get time slots for the current day
-                const daySlots = selectedEvent.schedule.timeSlots.filter(slot => slot.day === dayName);
-
-                daySlots.forEach((slot, index) => {
-                  sessions.push(
-                    <div key={`${currentDate.toISOString()}-${index}`} className="w-5/6 flex flex-row justify-between">
-                      <div className="bg-gray-200 px-4 py-1 rounded text-sm">
-                        <p>{currentDate.toLocaleDateString("en-CA")}</p>
-                        <p>{slot.startTime} - {slot.endTime}</p>
-                      </div>
-                    </div>
-                  );
-                });
-              }
-
-              // Move to the next day
-              currentDate.setDate(currentDate.getDate() + 1);
-            }
-
-            return sessions.length > 0 ? sessions : <p>No scheduled sessions.</p>;
-          })()}
-        </div>
-      ) : (
-        // One-Time Event Handling
-        selectedEvent.schedule &&
-        selectedEvent.schedule.scheduleType === "One-time" &&
-        selectedEvent.schedule.oneTimeDate ? (
-          <div className="mt-4 p-4 bg-gray-100 rounded">
-            <h3 className="text-lg font-semibold">One-Time Event</h3>
-            <p className="text-gray-700">Date: {new Date(selectedEvent.schedule.oneTimeDate).toLocaleDateString("en-CA")}</p>
-            <p className="text-gray-700">
-              Time: {selectedEvent.schedule.oneTimeStartTime} - {selectedEvent.schedule.oneTimeEndTime}
-            </p>
+              return sessions.length > 0 ? sessions : <p>No scheduled sessions.</p>;
+            })()}
           </div>
         ) : (
-          <p className="text-gray-700">No scheduled sessions.</p>
-        )
-      )}
+          // One-time Event Handling
+          (() => {
+            if (!selectedEvent.schedule.oneTimeDate) {
+              return <p className="text-gray-700">No date selected.</p>;
+            }
+
+            const eventDate = new Date(selectedEvent.schedule.oneTimeDate).toLocaleDateString("en-CA");
+
+            return (
+              <div className="mt-4 p-4 bg-gray-100 rounded">
+                <h3 className="text-lg font-semibold">One-Time Event</h3>
+                <p className="text-gray-700">Date: {eventDate}</p>
+                <p className="text-gray-700">
+                  Time: {selectedEvent.schedule.oneTimeStartTime} - {selectedEvent.schedule.oneTimeEndTime}
+                </p>
+              </div>
+            );
+          })()
+        )}
 
       <button onClick={() => setSelectedEvent(null)} className="mt-4 px-4 py-2 bg-gray-500 text-white rounded">
         Close
@@ -292,7 +317,6 @@ const handleSaveReschedule = async () => {
     </div>
   </div>
 )}
-
 
 {rescheduleEvent && (
   <div className="fixed top-0 left-0 w-full h-screen flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
@@ -304,77 +328,63 @@ const handleSaveReschedule = async () => {
         <p>Duration: {rescheduleEvent.duration} mins</p>
         <p>Price: ${rescheduleEvent.price}</p>
 
-        {/* 🔄 Recurrent Event Handling */}
-        {rescheduleEvent.schedule?.scheduleType !== "One-time" &&
-        rescheduleEvent.schedule?.timeSlots &&
-        rescheduleEvent.schedule?.startDate &&
-        rescheduleEvent.schedule?.endDate ? (
-          <div className="w-full grid grid-cols-4 gap-2 mt-2">
-            {(() => {
-              const startDate = new Date(rescheduleEvent.schedule.startDate);
-              const endDate = new Date(rescheduleEvent.schedule.endDate);
-              const enabledDays = rescheduleEvent.schedule.enabledDays || []; // ✅ Ensure it's an array
-              const sessions = [];
-
-              let currentDate = new Date(startDate);
-              while (currentDate <= endDate) {
-                const dayName = currentDate.toLocaleDateString("en-US", { weekday: "long" });
-
-                if (enabledDays.includes(dayName)) {
-                  // ✅ Corrected timeSlots filtering using dayName
-                  const daySlots = rescheduleEvent.schedule.timeSlots.filter(slot => slot.day === dayName);
-
-                  daySlots.forEach((slot, index) => {
-                    sessions.push(
-                      <div key={`${currentDate.toISOString()}-${index}`} className="w-5/6 flex flex-row justify-between">
-                        <span className="bg-gray-200 px-2 py-1 rounded text-sm">
-                          {currentDate.toLocaleDateString("en-CA")}: {slot.startTime} - {slot.endTime}
-                        </span>
-                        <button
-                          onClick={() => handleEdit(rescheduleEvent, slot)} // ✅ Passes correct slot data
-                          className="m-2 px-4 py-2 bg-red-500 text-white rounded cursor-pointer"
-                          aria-label="Edit session"
-                        >
-                          Edit
-                        </button>
-                      </div>
-                    );
-                  });
-                }
-
-                currentDate.setDate(currentDate.getDate() + 1);
-              }
-
-              return sessions.length > 0 ? sessions : <p>No scheduled sessions.</p>;
-            })()}
-          </div>
-        ) : (
-          // 🕐 One-time Event Handling
-          rescheduleEvent.schedule?.oneTimeDate ? (
-            <div className="mt-4 p-4 bg-gray-100 rounded">
-              <h3 className="text-lg font-semibold">One-Time Event</h3>
-              <p className="text-gray-700">
-                Date: {new Date(rescheduleEvent.schedule.oneTimeDate).toLocaleDateString("en-CA")}
-              </p>
-              <p className="text-gray-700">
-                Time: {rescheduleEvent.schedule.oneTimeStartTime} - {rescheduleEvent.schedule.oneTimeEndTime}
-              </p>
-              <button
-                onClick={() => handleEdit(rescheduleEvent, {
-                  startTime: rescheduleEvent.schedule.oneTimeStartTime,
-                  endTime: rescheduleEvent.schedule.oneTimeEndTime,
-                  date: rescheduleEvent.schedule.oneTimeDate
-                })}
-                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
-                aria-label="Edit session"
-              >
-                Edit One-Time Event
-              </button>
+        {/* Multi-session Event Handling */}
+        {rescheduleEvent.schedule.scheduleType !== "One-time" &&
+  rescheduleEvent.schedule.timeSlots &&
+  rescheduleEvent.schedule.timeSlots.length > 0 ? (
+    <div className="w-full grid grid-cols-4 gap-2 mt-2">
+      {rescheduleEvent.schedule.timeSlots.map((slot) => {
+        const dateString = new Date(slot.date).toLocaleDateString("en-CA");
+        return (
+          <div key={slot._id} className="w-5/6 flex flex-row justify-between">
+            <div className="bg-gray-200 px-4 py-1 rounded text-sm">
+              <p>{dateString}</p>
+              <p>{slot.startTime} - {slot.endTime}</p>
             </div>
-          ) : (
-            <p className="text-gray-700">No date selected.</p>
-          )
-        )}
+            <button
+              onClick={() =>
+                handleEdit(rescheduleEvent, {
+                  id:slot._id,
+                  date: slot.date,
+                  startTime: slot.startTime,
+                  endTime: slot.endTime,
+                })
+              }
+              className="m-2 px-4 py-2 bg-red-500 text-white rounded cursor-pointer"
+              aria-label="Edit session"
+            >
+              Edit
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  ) : rescheduleEvent.schedule.scheduleType === "One-time" &&
+    rescheduleEvent.schedule.oneTimeDate ? (
+    <div className="mt-4 p-4 bg-gray-100 rounded">
+      <h3 className="text-lg font-semibold">One-Time Event</h3>
+      <p className="text-gray-700">
+        Date: {new Date(rescheduleEvent.schedule.oneTimeDate).toLocaleDateString("en-CA")}
+      </p>
+      <p className="text-gray-700">
+        Time: {rescheduleEvent.schedule.oneTimeStartTime} - {rescheduleEvent.schedule.oneTimeEndTime}
+      </p>
+      <button
+        onClick={() => handleEdit(rescheduleEvent, {
+          date: rescheduleEvent.schedule.oneTimeDate,
+          startTime: rescheduleEvent.schedule.oneTimeStartTime,
+          endTime: rescheduleEvent.schedule.oneTimeEndTime,
+        })}
+        className="mt-2 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
+        aria-label="Edit session"
+      >
+        Edit One-Time Event
+      </button>
+    </div>
+  ) : (
+    <p className="text-gray-700">No scheduled sessions available.</p>
+  )}
+
       </div>
 
       <button
@@ -398,32 +408,28 @@ const handleSaveReschedule = async () => {
     <div className="bg-white p-6 rounded-lg w-1/3">
       <h2 className="text-xl font-bold">Reschedule Event</h2>
 
-      {rescheduleEvent?.schedule?.scheduleType === "Recurrent" ? (
+      {rescheduleEvent.schedule.scheduleType === "Recurrent" ? (
         <div className="mt-4 p-4 bg-gray-100 rounded">
           <h3 className="text-lg font-semibold">Edit Recurring Session</h3>
-          
-          {/* 🕒 Start Time Input */}
           <label className="block text-gray-700">Start Time</label>
           <input
             type="time"
-            value={newStartTime || ""}
+            value={newStartTime}
             onChange={(e) => setNewStartTime(e.target.value)}
             className="w-full p-2 border rounded"
           />
 
-          {/* ⏳ End Time Input */}
           <label className="block text-gray-700 mt-2">End Time</label>
           <input
             type="time"
-            value={newEndTime || ""}
+            value={newEndTime}
             onChange={(e) => setNewEndTime(e.target.value)}
             className="w-full p-2 border rounded"
           />
 
-          {/* 💾 Save Button */}
           <button
             onClick={handleSaveReschedule}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
           >
             Save Changes
           </button>
@@ -431,55 +437,49 @@ const handleSaveReschedule = async () => {
       ) : (
         <div className="mt-4 p-4 bg-gray-100 rounded">
           <h3 className="text-lg font-semibold">Edit One-Time Session</h3>
-          
-          {/* 📅 Date Input */}
           <label className="block text-gray-700">Date</label>
           <input
             type="date"
-            value={newDate || ""}
+            value={newDate}
             onChange={(e) => setNewDate(e.target.value)}
             className="w-full p-2 border rounded"
+            min={disablePastDate()}
           />
 
-          {/* 🕒 Start Time Input */}
           <label className="block text-gray-700 mt-2">Start Time</label>
           <input
             type="time"
-            value={newStartTime || ""}
+            value={newStartTime}
             onChange={(e) => setNewStartTime(e.target.value)}
             className="w-full p-2 border rounded"
           />
 
-          {/* ⏳ End Time Input */}
           <label className="block text-gray-700 mt-2">End Time</label>
           <input
             type="time"
-            value={newEndTime || ""}
+            value={newEndTime}
             onChange={(e) => setNewEndTime(e.target.value)}
             className="w-full p-2 border rounded"
           />
 
-          {/* 💾 Save Button */}
           <button
             onClick={handleSaveReschedule}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
           >
             Save Changes
           </button>
         </div>
       )}
 
-      {/* ❌ Cancel Button */}
       <button
         onClick={() => setEditModal(false)}
-        className="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+        className="mt-4 px-4 py-2 bg-gray-500 text-white rounded"
       >
         Cancel
       </button>
     </div>
   </div>
 )}
-
 
 
 
