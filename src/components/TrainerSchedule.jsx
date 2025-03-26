@@ -22,6 +22,7 @@ const TrainerSchedule = () => {
         const { data } = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes", {
           withCredentials: true,
         });
+        console.log("Schedule Data:", data);
         setSchedule(data);
       } catch (error) {
         console.error("Error fetching schedule:", error);
@@ -198,6 +199,7 @@ const handleSaveReschedule = async () => {
   console.log("selectedEvent", selectedEvent);
   console.log("rescheduleEvent", rescheduleEvent);
  
+  console.log("schedule", schedule);
 
   return (
     <div className="p-6">
@@ -205,11 +207,11 @@ const handleSaveReschedule = async () => {
       {schedule.length === 0 ? (
         <p>No events scheduled.</p>
       ) : (
-        schedule.map(({ date, events }) => (
+        schedule?.map(({ date, events }) => (
           <div key={date} className="mb-6">
             <h2 className="text-xl font-bold text-blue-600">{new Date(date).toDateString()}</h2>
             <div className="mt-2 space-y-4">
-              {events.map((cls) => (
+              {events?.map((cls) => (
                 <div key={cls._id} className="border p-4 rounded-lg shadow-md bg-white">
                   <h3 className="text-lg font-semibold">{cls.title}</h3>
                   <p className="text-gray-600">{cls.category} | {cls.capacity} slots</p>
@@ -236,7 +238,7 @@ const handleSaveReschedule = async () => {
         ))
       )}
 
-{selectedEvent && (
+{/* {selectedEvent && (
   <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
     <div className="bg-white p-6 rounded-lg w-2/3 h-screen overflow-y-auto">
       <h2 className="text-xl font-bold">{selectedEvent.title}</h2>
@@ -316,9 +318,9 @@ const handleSaveReschedule = async () => {
       </button>
     </div>
   </div>
-)}
+)} */}
 
-{rescheduleEvent && (
+{/* {rescheduleEvent && (
   <div className="fixed top-0 left-0 w-full h-screen flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
     <div className="bg-white p-6 mx-auto rounded-lg w-2/3 h-screen overflow-y-auto m-4">
       <div>
@@ -328,7 +330,6 @@ const handleSaveReschedule = async () => {
         <p>Duration: {rescheduleEvent.duration} mins</p>
         <p>Price: ${rescheduleEvent.price}</p>
 
-        {/* Multi-session Event Handling */}
         {rescheduleEvent.schedule.scheduleType !== "One-time" &&
   rescheduleEvent.schedule.timeSlots &&
   rescheduleEvent.schedule.timeSlots.length > 0 ? (
@@ -396,14 +397,14 @@ const handleSaveReschedule = async () => {
       </button>
     </div>
   </div>
-)}
+)} */}
 
 
 
 
 
     
-{editModal && rescheduleEvent && (
+{/* {editModal && rescheduleEvent && (
   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
     <div className="bg-white p-6 rounded-lg w-1/3">
       <h2 className="text-xl font-bold">Reschedule Event</h2>
@@ -479,7 +480,7 @@ const handleSaveReschedule = async () => {
       </button>
     </div>
   </div>
-)}
+)} */}
 
 
 

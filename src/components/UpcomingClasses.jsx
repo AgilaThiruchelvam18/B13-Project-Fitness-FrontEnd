@@ -17,7 +17,7 @@ const UpcomingClasses = () => {
     const fetchClasses = async () => {
       try {
         const response = await axios.get(
-          "https://fitnesshub-5yf3.onrender.com/api/classes",
+          "https://fitnesshub-5yf3.onrender.com/api/users",
           { withCredentials: true }
         );
         setClasses(response.data);
