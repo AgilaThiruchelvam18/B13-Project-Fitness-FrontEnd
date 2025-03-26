@@ -44,7 +44,7 @@ const SignupForm = () => {
           validationSchema={validationSchema}
           onSubmit={async (values, { setSubmitting }) => {
             try {
-              const formData = new FormData();
+              // const formData = new FormData();
               // Object.keys(values).forEach((key) => {
               //   formData.append(key, values[key]);
               // });
