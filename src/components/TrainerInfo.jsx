@@ -134,7 +134,7 @@ const TrainerProfile = () => {
                   >
                     <div className="flex items-center justify-between">
                       <p className="font-semibold">{review.user.userName}</p>
-                      <p className="text-yellow-500">⭐ {review.rating || "N/A"}</p>
+                      <p className="text-yellow-500">⭐ {review.rating || "5"}</p>
                     </div>
                     <p className="text-gray-600 mt-2">{review.comment}</p>
                   </div>
