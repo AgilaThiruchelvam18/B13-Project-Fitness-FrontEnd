@@ -121,7 +121,7 @@ const TrainerSignup = () => {
               <Field as="textarea" name="bio" placeholder="Short Bio" className="border p-2 rounded mt-1" />
               <ErrorMessage name="bio" component="div" className="text-red-500 text-sm" />
 
-              <label className="mt-2">Upload Photos/Videos:</label>
+              {/* <label className="mt-2">Upload Photos/Videos:</label>
               <input
                 type="file"
                 accept="image/*, video/*"
@@ -129,7 +129,7 @@ const TrainerSignup = () => {
                 onChange={(event) => setFieldValue("mediaUploads", Array.from(event.target.files))}
                 className="border p-2 rounded mt-1"
               />
-              <ErrorMessage name="mediaUploads" component="div" className="text-red-500 text-sm" />
+              <ErrorMessage name="mediaUploads" component="div" className="text-red-500 text-sm" /> */}
 
               <button type="submit" disabled={isSubmitting} className={`mt-4 py-2 rounded ${isSubmitting ? "bg-gray-400" : "bg-blue-500 text-white"}`}>
                 {isSubmitting ? "Registering..." : "Sign Up"}

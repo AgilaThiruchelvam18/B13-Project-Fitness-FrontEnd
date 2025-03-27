@@ -64,7 +64,7 @@ const TrainerProfile = () => {
         <div className="w-full lg:w-2/3 bg-white shadow-lg rounded-lg flex flex-col p-6">
           {/* Trainer Info */}
           <div className="flex-col sm:flex-col lg:flex-row items-center gap-6">
-            {trainer.mediaUploads && trainer.mediaUploads.length > 0 ? (
+            {/* {trainer.mediaUploads && trainer.mediaUploads.length > 0 ? (
     
    <img
    src={trainer.mediaUploads[0]?.url.startsWith("http")
@@ -77,7 +77,7 @@ const TrainerProfile = () => {
               <div className="w-full h-screen bg-gray-300 flex sm:flex-col md:flex-row  items-center justify-center rounded-full">
                 <span className="text-gray-600">No Image</span>
               </div>
-            )}
+            )} */}
             <div>
               <h2 className="text-2xl font-semibold">{trainer.username}</h2>
               <p className="text-gray-600">{trainer.email}</p>
