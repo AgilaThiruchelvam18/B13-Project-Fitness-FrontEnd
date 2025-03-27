@@ -119,11 +119,11 @@ console.log("urlCategory",urlCategory)
               className="bg-gray-100 p-4 rounded-lg shadow-md flex flex-col items-center text-center"
             >
               {/* Trainer Image */}
-              <img
+              {/* <img
                 src={trainer.coverMedia?.url || "https://via.placeholder.com/150"}
                 alt={trainer.userName}
                 className="w-32 h-32 object-cover rounded-full mb-3"
-              />
+              /> */}
 
               {/* Trainer Name & Rating */}
               <div className="w-full flex flex-row justify-between">
