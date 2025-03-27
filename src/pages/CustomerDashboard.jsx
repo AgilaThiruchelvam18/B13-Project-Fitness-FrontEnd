@@ -36,7 +36,7 @@ const CustomerDashboard = () => {
            <Route path="CustomerDetails/:id" element={<CustomerDetails />} />
             <Route path="bookinghistory" element={<BookingHistory />} />
             <Route path="upcomingclasses" element={<UpcomingClasses />} />
-            TrainerDetails
+            
           </Routes>
         </DashPage>
         

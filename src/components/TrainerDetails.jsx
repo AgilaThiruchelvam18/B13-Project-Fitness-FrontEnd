@@ -14,10 +14,11 @@ const TrainerDetails = () => {
     const fetchTrainerDetails = async () => {
       try {
         const res = await axios.get(`https://fitnesshub-5yf3.onrender.com/api/trainers/${id}`, {
-          withCredentials: true,
+          withCredentials: true,        
         });
-        setTrainer(res.data);
         console.log("res.data",res.data);
+        setTrainer(res.data);
+      
       } catch (err) {
         setError("Trainer not found!");
       } finally {
@@ -30,9 +31,15 @@ const TrainerDetails = () => {
 
   if (loading) return <div className="text-center text-gray-600 mt-10">Loading trainer details...</div>;
   if (error) return <div className="text-center text-red-500 mt-10">{error}</div>;
-
+  const formatTime = (time) => {
+    const [hour, minute] = time.split(":");
+    const period = hour >= 12 ? "PM" : "AM";
+    const formattedHour = hour % 12 || 12; // Convert 24-hour to 12-hour format
+    return `${formattedHour}:${minute} ${period}`;
+  };
+  
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6">
+    <div className="max-w-5xl mx-auto mt-10 p-6 h-screen">
       <button className="mb-4 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400" onClick={() => navigate(-1)}>
         ← Back
       </button>
@@ -57,8 +64,13 @@ const TrainerDetails = () => {
                 <h4 className="text-md font-semibold">{cls.title}</h4>
                 <p className="text-gray-600">Category: {cls.category}</p>
                 <p className="text-gray-600">⏳ {cls.duration} mins</p>
-                <p className="text-gray-600">📅 {new Date(cls.timeSlots[0].date).toLocaleDateString()}  |  {cls.timeSlots[0].time}</p>
+        { cls.schedule.scheduleType==="Recurrent"?   (<p className="text-gray-600">Multiple Sessions</p>):
+        (<p className="text-gray-600">📅 {new Date(cls.schedule.oneTimeDate).toLocaleDateString()}  |    🕒 {formatTime(cls.schedule?.oneTimeStartTime)} - {formatTime(cls.schedule?.oneTimeEndTime)}
+
+                </p>)}
               </div>
+
+
             ))
           ) : (
             <p className="text-gray-600">No upcoming classes.</p>

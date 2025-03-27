@@ -15,14 +15,15 @@ const TrainerSchedule = () => {
   const [recurringTimeSlots, setRecurringTimeSlots] = useState([]);
   const [newTimeSlot, setNewTimeSlot] = useState(null);
   const [updatedSlot, setUpdatedSlot] = useState({});
-
   useEffect(() => {
+    fetchSchedule();
+  }, []);
+ 
     const fetchSchedule = async () => {
       try {
         const { data } = await axios.get("https://fitnesshub-5yf3.onrender.com/api/classes", {
           withCredentials: true,
         });
-        console.log("Schedule Data:", data);
         setSchedule(data);
       } catch (error) {
         console.error("Error fetching schedule:", error);
@@ -31,8 +32,19 @@ const TrainerSchedule = () => {
       }
     };
 
-    fetchSchedule();
-  }, []);
+  const handleComplete = async (classId) => {
+    if (!window.confirm("Mark this class as completed?")) return;
+    try {
+      await axios.put(`https://fitnesshub-5yf3.onrender.com/api/trainers/status/${classId}`,
+        { withCredentials: true }
+      );
+      alert("Class marked as completed!");
+      fetchSchedule();
+        } catch (error) {
+      console.error("Error completing class:", error);
+      alert("Failed to mark class as completed.");
+    }
+  };
   
   const disablePastDate = () => {
     const today = new Date();
@@ -199,20 +211,19 @@ const handleSaveReschedule = async () => {
   console.log("selectedEvent", selectedEvent);
   console.log("rescheduleEvent", rescheduleEvent);
  
-  console.log("schedule", schedule);
 
   return (
-    <div className="p-6">
+    <div className="p-6 w-full">
       <h1 className="text-2xl font-semibold mb-4">Class Schedule</h1>
       {schedule.length === 0 ? (
         <p>No events scheduled.</p>
       ) : (
-        schedule?.map(({ date, events }) => (
-          <div key={date} className="mb-6">
+        schedule.map(({ date, events }) => (
+          <div key={date} className="mb-6 w-full p-4">
             <h2 className="text-xl font-bold text-blue-600">{new Date(date).toDateString()}</h2>
-            <div className="mt-2 space-y-4">
-              {events?.map((cls) => (
-                <div key={cls._id} className="border p-4 rounded-lg shadow-md bg-white">
+            <div className="w-full mt-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              {events.map((cls) => (
+                <div key={cls._id} className="w-full border p-4 rounded-lg shadow-md bg-white">
                   <h3 className="text-lg font-semibold">{cls.title}</h3>
                   <p className="text-gray-600">{cls.category} | {cls.capacity} slots</p>
                   <p className="text-gray-700">Duration: {cls.duration} mins | Price: ${cls.price}</p>
@@ -220,16 +231,20 @@ const handleSaveReschedule = async () => {
                     `${cls.schedule.oneTimeStartTime} - ${cls.schedule.oneTimeEndTime}` : "Multiple Sessions"}
                   </p>
                   {cls.schedule.scheduleType !== "One-time" && cls.schedule.recurringTimes && (
-                    <div className="grid grid-cols-4 gap-2 mt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
                       {cls.schedule.recurringTimes.map((time, index) => (
                         <span key={index} className="bg-gray-200 px-2 py-1 rounded text-sm">{time}</span>
                       ))}
                     </div>
                   )}
-                  <div className="flex space-x-2 mt-4">
-                    <button onClick={() => handleView(cls)} className="px-4 py-2 bg-blue-500 text-white rounded">View</button>
-                    <button onClick={() => handleReschedule(cls)} className="px-4 py-2 bg-green-500 text-white rounded">Reschedule</button>
-                    <button onClick={() => handleCancel(cls._id)} className="px-4 py-2 bg-red-500 text-white rounded">Cancel</button>
+                  <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4  ">
+                    <button onClick={() => handleView(cls)} className="px-2 py-2 bg-blue-500 text-white rounded m-1">View</button>
+                    <button onClick={() => handleReschedule(cls)} className="px-1 py-2 bg-green-500 text-white rounded m-1">Reschedule</button>
+                    <button onClick={() => handleCancel(cls._id)} className="px-2 py-2 bg-red-500 text-white rounded m-1">Cancel</button>
+                    <button onClick={() => handleComplete(cls._id)} className="px-2 py-2 bg-purple-500 text-white rounded flex items-center gap-2 hover:bg-purple-600 m-1 text-center">
+    Complete
+  </button>
+                  
                   </div>
                 </div>
               ))}
@@ -238,7 +253,7 @@ const handleSaveReschedule = async () => {
         ))
       )}
 
-{/* {selectedEvent && (
+{selectedEvent && (
   <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
     <div className="bg-white p-6 rounded-lg w-2/3 h-screen overflow-y-auto">
       <h2 className="text-xl font-bold">{selectedEvent.title}</h2>
@@ -251,7 +266,7 @@ const handleSaveReschedule = async () => {
         selectedEvent.schedule.timeSlots &&
         selectedEvent.schedule.startDate &&
         selectedEvent.schedule.endDate ? (
-          <div className="w-full grid grid-cols-4 gap-2 mt-2">
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
             {(() => {
                const startDate = new Date(selectedEvent.schedule.startDate);
                const endDate = new Date(selectedEvent.schedule.endDate);
@@ -318,9 +333,9 @@ const handleSaveReschedule = async () => {
       </button>
     </div>
   </div>
-)} */}
+)}
 
-{/* {rescheduleEvent && (
+{rescheduleEvent && (
   <div className="fixed top-0 left-0 w-full h-screen flex items-center justify-center bg-black bg-opacity-50 overflow-y-auto">
     <div className="bg-white p-6 mx-auto rounded-lg w-2/3 h-screen overflow-y-auto m-4">
       <div>
@@ -330,10 +345,11 @@ const handleSaveReschedule = async () => {
         <p>Duration: {rescheduleEvent.duration} mins</p>
         <p>Price: ${rescheduleEvent.price}</p>
 
+        {/* Multi-session Event Handling */}
         {rescheduleEvent.schedule.scheduleType !== "One-time" &&
   rescheduleEvent.schedule.timeSlots &&
   rescheduleEvent.schedule.timeSlots.length > 0 ? (
-    <div className="w-full grid grid-cols-4 gap-2 mt-2">
+    <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-2">
       {rescheduleEvent.schedule.timeSlots.map((slot) => {
         const dateString = new Date(slot.date).toLocaleDateString("en-CA");
         return (
@@ -397,16 +413,16 @@ const handleSaveReschedule = async () => {
       </button>
     </div>
   </div>
-)} */}
+)}
 
 
 
 
 
     
-{/* {editModal && rescheduleEvent && (
+{editModal && rescheduleEvent && (
   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-    <div className="bg-white p-6 rounded-lg w-1/3">
+    <div className="bg-white p-6 rounded-lg w-full md:w-1/3">
       <h2 className="text-xl font-bold">Reschedule Event</h2>
 
       {rescheduleEvent.schedule.scheduleType === "Recurrent" ? (
@@ -480,7 +496,7 @@ const handleSaveReschedule = async () => {
       </button>
     </div>
   </div>
-)} */}
+)}
 
 
 

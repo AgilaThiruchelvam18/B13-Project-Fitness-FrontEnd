@@ -58,12 +58,12 @@ const TrainerProfile = () => {
   // : `${backendURL}${trainer.mediaUploads[0]?.url}`;
    
   return (
-    <div className="w-full h-screen flex flex-col bg-gray-100 p-4 gap-6">
-      <div className="w-full flex gap-6">
+    <div className="w-full h-screen flex flex-col bg-gray-100 p-4 ">
+      <div className="w-full flex flex-col sm:flex-col lg:flex-row ">
         {/* Left Side - Profile Info & Reviews */}
-        <div className="w-2/3 bg-white shadow-lg rounded-lg flex flex-col p-6">
+        <div className="w-full lg:w-2/3 bg-white shadow-lg rounded-lg flex flex-col p-6">
           {/* Trainer Info */}
-          <div className="flex items-center gap-6">
+          <div className="flex-col sm:flex-col lg:flex-row items-center gap-6">
             {trainer.mediaUploads && trainer.mediaUploads.length > 0 ? (
     
    <img
@@ -74,7 +74,7 @@ const TrainerProfile = () => {
    className="w-24 h-24 rounded-full object-cover"
  />
   ) : (
-              <div className="w-24 h-24 bg-gray-300 flex items-center justify-center rounded-full">
+              <div className="w-full h-screen bg-gray-300 flex sm:flex-col md:flex-row  items-center justify-center rounded-full">
                 <span className="text-gray-600">No Image</span>
               </div>
             )}
@@ -86,7 +86,7 @@ const TrainerProfile = () => {
           </div>
 
           {/* Experience, Ratings, Bio */}
-          <div className="mt-4 grid grid-cols-3 gap-4">
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <h3 className="text-lg font-semibold">Experience</h3>
               <p className="text-gray-700">{trainer.experience} years</p>
@@ -105,7 +105,7 @@ const TrainerProfile = () => {
           </div>
 
           {/* Expertise, Certifications, Specialization */}
-          <div className="mt-4 grid grid-cols-3 gap-4">
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <h3 className="text-lg font-semibold">Expertise</h3>
               <p className="text-gray-700">
@@ -125,7 +125,7 @@ const TrainerProfile = () => {
           {/* User Reviews - Grid Layout */}
           <div className="mt-4 flex-grow overflow-y-auto border-t pt-4">
             <h3 className="text-xl font-semibold mb-2">User Reviews</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {trainer.reviews.length > 0 ? (
                 trainer.reviews.map((review, index) => (
                   <div
@@ -147,7 +147,7 @@ const TrainerProfile = () => {
         </div>
 
         {/* Right Side - Created Events */}
-        <div className="w-1/3 bg-white shadow-lg rounded-lg p-6 overflow-y-auto">
+        <div className="w-full lg:w-1/3 bg-white shadow-lg rounded-lg p-6 overflow-y-auto">
           <h3 className="text-xl font-semibold mb-4">Created Events</h3>
           {trainer.classes.length > 0 ? (
             trainer.classes.map((event, index) => (

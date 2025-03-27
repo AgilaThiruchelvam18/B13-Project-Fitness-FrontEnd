@@ -83,7 +83,7 @@ console.log("urlCategory",urlCategory)
   return (
     <div className="max-w-6xl mx-auto mt-10 p-6">
       {/* Category Filter Buttons */}
-      <div className="flex justify-center space-x-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-8">
         {Object.keys(categoryContent).map((cat) => (
           <button
             key={cat}

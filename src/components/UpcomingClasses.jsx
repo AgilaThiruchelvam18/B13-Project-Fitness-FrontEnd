@@ -36,7 +36,7 @@ const UpcomingClasses = () => {
       cls.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
-
+console.log("filteredClasses",filteredClasses);
   const handleBookNow = async (cls) => {
     setBookingLoading(cls._id); // Set the current class as loading
     try {
@@ -45,6 +45,10 @@ const UpcomingClasses = () => {
         trainerId: cls.trainer,
         category: cls.category,
         price: cls.price,
+        bookingDate: cls.schedule.scheduleType === "One-time" ? cls.schedule.oneTimeDate : "",
+        bookingStartTime: cls.schedule.scheduleType === "One-time" ? cls.schedule.oneTimeStartTime : "",
+        bookingEndTime: cls.schedule.scheduleType === "One-time" ? cls.schedule.oneTimeEndTime : "",
+   
       };
 
       const response = await axios.post(
@@ -60,7 +64,12 @@ const UpcomingClasses = () => {
       setBookingLoading(null); // Reset loading state after booking
     }
   };
-
+  const formatTime = (time) => {
+    const [hour, minute] = time.split(":");
+    const period = hour >= 12 ? "PM" : "AM";
+    const formattedHour = hour % 12 || 12; // Convert 24-hour to 12-hour format
+    return `${formattedHour}:${minute} ${period}`;
+  };
   return (
     <div className="max-w-6xl mx-auto mt-10 p-6">
       <h2 className="text-2xl font-semibold mb-6">Upcoming Classes</h2>
@@ -72,7 +81,7 @@ const UpcomingClasses = () => {
       )}
 
       <div className="flex flex-wrap justify-between items-center mb-6">
-        <div className="flex gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {categories.map((category) => (
             <button
               key={category}
@@ -105,16 +114,37 @@ const UpcomingClasses = () => {
             <div key={cls._id} className="bg-gray-100 p-4 rounded-lg shadow-md flex flex-col items-center text-center">
               <h3 className="text-lg font-semibold">{cls.title}</h3>
               <div className="w-full flex flex-col justify-between">
-                <div className="w-full flex flex-row justify-between">
+                {/* <div className="w-full flex flex-row justify-between">
                   <p className="text-gray-600">
                     <Link to={`/customer/CustomerDashboard/TrainerDetails/${cls.trainer._id}`} className="text-blue-500 hover:underline">
                       {cls.trainer.userName}
                     </Link>
                   </p>
-                </div>
-                <div className="w-full flex flex-row justify-between">
+                </div> */}
+                <div className="flex flex-row w-full justify-between m-2">
+                                <p className="text-gray-600">
+                                  <Link
+                                    to={`/customer/CustomerDashboard/TrainerDetails/${cls.trainer._id}`}
+                                    className="text-blue-500 hover:underline"
+                                  >
+                                    {cls.trainer.userName}
+                                  </Link>
+                                </p>
+                                <p className="text-yellow-500 text-md">
+                                  ⭐ {cls.trainer.ratings.averageRating || "N/A"}/5
+                                </p>
+                              </div>
+                             
+                <div className="w-full flex flex-row justify-between m-2">
                   <p className="text-sm text-gray-500">{cls.category}</p>
                   <p className="text-sm text-gray-500">⏳ {cls.duration} mins</p>
+                </div>
+                <div className="m-2">
+             { cls.schedule.scheduleType==="Recurrent"?   (<div><div className="text-gray-600">Multiple Sessions</div><div>Check TimeSlots</div></div>):
+        (<div><div className="text-gray-600">📅 {new Date(cls.schedule.oneTimeDate).toLocaleDateString()}</div>
+            <div>🕒 {formatTime(cls.schedule?.oneTimeStartTime)} - {formatTime(cls.schedule?.oneTimeEndTime)}
+
+                </div></div>)}
                 </div>
               </div>
               <div className="mt-4 w-full">
@@ -123,7 +153,7 @@ const UpcomingClasses = () => {
                   onClick={() => handleBookNow(cls)}
                   disabled={bookingLoading === cls._id}
                 >
-                  {bookingLoading === cls._id ? "Booking..." : "Book Now"}
+                  {bookingLoading === cls._id ? "Adding..." : "Add to My Bookings"}
                 </button>
               </div>
             </div>
@@ -137,3 +167,10 @@ const UpcomingClasses = () => {
 };
 
 export default UpcomingClasses;
+{/* <div>   { cls.schedule.scheduleType==="Recurrent"?   (<div><p className="text-gray-600">Multiple Sessions</p></div>):
+  (<div> <div> <p className="text-gray-600">📅 {new Date(cls.schedule.oneTimeDate).toLocaleDateString()} </p></div>
+  <div>  <p>   🕒 {formatTime(cls.schedule?.oneTimeStartTime)} - {formatTime(cls.schedule?.oneTimeEndTime)}
+
+            </p></div></div>
+            
+          }  </div> */}

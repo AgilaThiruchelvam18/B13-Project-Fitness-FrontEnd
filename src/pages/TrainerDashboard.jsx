@@ -10,6 +10,7 @@ import TrainerSchedule from "../components/TrainerSchedule";
 // import Earnings from "./Earnings";
 // import Profile from "./Profile";
 import Sidebar from "../components/Sidebar";
+import TrainerDetails from "../components/TrainerDetails";
 // import TrainerProtectedRoute from "../components/TrainerProtectedRoute";
 
 function TrainerDashboard() {
@@ -28,7 +29,6 @@ function TrainerDashboard() {
             <Route path="classes" element={<Classes />} />
             <Route path="profile" element={<TrainerInfo />} />
             <Route path="schedule" element={<TrainerSchedule />} />
-
             <Route path="/TrainerInfo/:id" element={<TrainerInfo />} />
 
       //       {/* <Route path="schedule" element={<TrainerProtectedRoute><Schedule /></TrainerProtectedRoute>} />

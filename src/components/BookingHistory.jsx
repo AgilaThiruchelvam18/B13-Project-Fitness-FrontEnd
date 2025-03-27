@@ -27,8 +27,9 @@ const BookingHistory = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/trainer-auth/profile", { withCredentials: true });
-        const reviewsData = res.data.reviews.reduce((acc, review) => {
+        const res = await axios.get("https://fitnesshub-5yf3.onrender.com/api/reviews", { withCredentials: true });
+        console.log(res.data);
+        const reviewsData = res.data.reduce((acc, review) => {
           acc[review.booking] = { rating: review.rating, comment: review.comment, submitted: true };
           return acc;
         }, {});
@@ -97,7 +98,7 @@ const BookingHistory = () => {
       </div>
 
       <div className="flex justify-between items-center mb-6">
-        <div className="flex flex-wrap gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {categories.map((category) => (
             <button
               key={category}
@@ -142,7 +143,7 @@ const BookingHistory = () => {
               <p className="text-gray-600 font-semibold">{booking.classId?.title || "Unknown Class"}</p>
               <p className="text-sm text-gray-500">
                 Trainer:{" "}
-                <Link to={`/trainer/${booking.trainer?._id}`} className="text-blue-500 hover:underline">
+                <Link to={`/customer/CustomerDashboard/TrainerDetails/${booking.trainer?._id}`} className="text-blue-500 hover:underline">
                   {booking.trainer?.userName || "Unknown Trainer"}
                 </Link>
               </p>
@@ -161,7 +162,7 @@ const BookingHistory = () => {
                 >
                   {booking.status}
                 </div>
-              
+               
             </div>
 
             {booking.status === "Completed" && (

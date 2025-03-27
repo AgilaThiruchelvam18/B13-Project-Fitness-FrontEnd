@@ -13,7 +13,7 @@ const MyBookings = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showBookingDetails, setShowBookingDetails] = useState(false);
-
+  const [isSlotBooked, setIsSlotBooked] = useState(false);
   // Fetch Bookings
   const fetchBookings = async () => {
     try {
@@ -129,11 +129,12 @@ const MyBookings = () => {
       setIsProcessing(null); // Reset loading state in case of failure
     }
   };
-  
-  
-  
-  
-  
+  const formatTime = (time) => {
+    const [hour, minute] = time.split(":");
+    const period = hour >= 12 ? "PM" : "AM";
+    const formattedHour = hour % 12 || 12; // Convert 24-hour to 12-hour format
+    return `${formattedHour}:${minute} ${period}`;
+  };
   
   // 🔥 Filtered Bookings List
   const filteredBookings = bookings.filter((booking) =>
@@ -141,13 +142,47 @@ const MyBookings = () => {
     booking.classId.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 console.log("Filtered Bookings:", filteredBookings);
+console.log("selected Bookings:", selectedBooking);
+
+const handleRecurrentBooking = async (bookingDate,bookingStartTime,bookingEndTime) => {
+ 
+
+  try {
+    // Define updated recurrent booking details
+    const updatedBooking = {
+      bookingDate, // Keep the existing date
+      bookingStartTime, // Update start time if needed
+      bookingEndTime, // Update end time if needed
+      // recurrence: selectedBooking.classId.schedule.recurrence, // Keep recurrence details
+    };
+
+    // Send update request to backend
+    await axios.put(
+      `https://fitnesshub-5yf3.onrender.com/api/bookings/${selectedBooking._id}/update`,
+      updatedBooking,
+      { withCredentials: true }
+    );
+
+    // Fetch updated bookings after update
+    fetchBookings();
+
+    // Close modal after booking update
+    setShowBookingDetails(false);
+    setSelectedBooking(null);
+    setIsSlotBooked(true);
+  } catch (error) {
+    console.error("Error updating booking:", error.response?.data?.message || error.message);
+  }
+};
+
+
   return (
     <div className="max-w-6xl mx-auto mt-10 overflow-y-auto p-6">
       <h2 className="text-2xl font-semibold mb-6">My Bookings</h2>
 
       {/* Search & Filter Section */}
       <div className="flex flex-wrap justify-between items-center mb-6">
-        <div className="flex gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {categories.map((category) => (
             <button
               key={category}
@@ -202,7 +237,38 @@ console.log("Filtered Bookings:", filteredBookings);
                 <p className="text-sm text-gray-500">
                   ⏳ {booking.classId.duration} mins
                 </p>
+                
               </div>
+              <div className="m-2">
+  {booking.classId.schedule.scheduleType === "Recurrent" ? (
+    booking.bookingDate ? (
+      // Show specific date if available
+      <div>
+        <div className="text-gray-600">📅 {new Date(booking.bookingDate)?.toLocaleDateString()}</div>
+        <div>
+          🕒 {formatTime(booking.bookingStartTime)} - {formatTime(booking.bookingEndTime)}
+        </div>
+      </div>
+    ) : (
+      // Show message if multiple sessions exist
+      <div>
+        <div className="text-gray-600">📅 Multiple Sessions</div>
+        <div className="text-blue-500 cursor-pointer">Check Available Time Slots</div>
+      </div>
+    )
+  ) : (
+    // Handle One-time booking
+    <div>
+      <div className="text-gray-600">
+        📅 {new Date(booking.classId.schedule?.oneTimeDate)?.toLocaleDateString()}
+      </div>
+      <div>
+        🕒 {formatTime(booking.classId.schedule?.oneTimeStartTime)} - {formatTime(booking.classId.schedule?.oneTimeEndTime)}
+      </div>
+    </div>
+  )}
+</div>
+
 
               {/* Buttons */}
               <div className="mt-4 flex flex-col justify-between gap-2 w-full">
@@ -283,9 +349,10 @@ console.log("Filtered Bookings:", filteredBookings);
         </div>
       )}
       {/* 🔍 Booking Details Modal */}
+{/* 🔍 Booking Details Modal */}
 {showBookingDetails && selectedBooking && (
-  <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-    <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+  <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 ">
+    <div className="bg-white  rounded-lg shadow-lg w-2/3 mt-6 p-8 h-screen overflow-y-auto">
       <h3 className="text-lg font-semibold text-gray-900 mb-3">
         Booking Details
       </h3>
@@ -311,8 +378,45 @@ console.log("Filtered Bookings:", filteredBookings);
         <strong>Status:</strong> {selectedBooking.status}
       </p>
       <p className="text-gray-700">
-        <strong>paymentStatus:</strong> {selectedBooking.paymentStatus}
+        <strong>Payment Status:</strong> {selectedBooking.paymentStatus}
       </p>
+
+      {/* 🔥 Show Schedule Details */}
+   
+    <div className="bg-white p-6 rounded-lg ">
+        <h4 className="text-md font-semibold">Trainer Schedule</h4>
+        
+        {selectedBooking.classId.schedule.scheduleType === "Recurrent" ? (
+          <div className="mt-2 ">
+            <p className="text-sm text-gray-600">📅 Recurrent Schedule</p>
+            <div className="grid grid-cols-6 gap-6 text-center ">
+              {selectedBooking.classId.schedule.timeSlots.map((slot, index) => (
+                <div key={index} className="text-gray-700 bg-gray-100 rounded-lg shadow-lg p-2">
+                  <div className="flex flex-col">
+                    <div>🕒 {new Date(slot.date).toLocaleDateString()}-{slot.day}</div>
+                  <div> {formatTime(slot.startTime)} - {formatTime(slot.endTime)}</div>
+                 <div> <button className="px-2 py-2 bg-blue-500"  onClick={() => {
+handleRecurrentBooking(slot.date,slot.startTime,slot.endTime)
+   // Navigate back to My Bookings
+        }}>Book</button></div>
+                 </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="mt-2">
+            <p className="text-sm text-gray-600">📅 One-Time Schedule</p>
+            <p className="text-gray-700">
+              {new Date(selectedBooking.classId.schedule.oneTimeDate).toLocaleDateString()}
+            </p>
+            <p className="text-gray-700">
+              🕒 {formatTime(selectedBooking.classId.schedule.oneTimeStartTime)} - {formatTime(selectedBooking.classId.schedule.oneTimeEndTime)}
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* Close Button */}
       <div className="flex justify-end mt-4">
         <button
@@ -325,6 +429,7 @@ console.log("Filtered Bookings:", filteredBookings);
     </div>
   </div>
 )}
+
 
     </div>
   );
