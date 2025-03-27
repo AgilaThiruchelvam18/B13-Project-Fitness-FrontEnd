@@ -18,7 +18,7 @@ const categoryContent = {
     description: "Enhance flexibility, mindfulness, and relaxation with expert yoga guidance.",
     stats: "🧘 30,000+ yogis transformed | 🌿 200,000+ hours of meditation | 💖 95% satisfaction rate",
   },
-  strength: {
+  strengthTraining: {
     title: "STRENGTH TRAINING COACHES",
     description: "Build muscle, gain strength, and boost performance with expert coaching.",
     stats: "🏋️ 100,000+ kg lifted | 💪 50,000+ transformations | 🏆 1,000+ strength competitions won",
@@ -132,7 +132,7 @@ console.log("urlCategory",urlCategory)
 </div>
               {/* Categories */}
               <p className="text-gray-600 text-sm">
-                Expertise: {trainer.expertise?.join(", ") || "N/A"}
+                Expertise: {trainer.expertise?.join(", ") || "-"}
               </p>
 
               {/* View Details Button */}
