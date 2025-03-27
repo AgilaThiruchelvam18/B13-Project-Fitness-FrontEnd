@@ -128,7 +128,7 @@ console.log("urlCategory",urlCategory)
               {/* Trainer Name & Rating */}
               <div className="w-full flex flex-row justify-between">
               <h3 className="text-lg font-semibold">{trainer.userName}</h3>
-              <p className="text-yellow-500">⭐ {trainer.ratings?.averageRating || "N/A"}/5</p>
+              <p className="text-yellow-500">⭐ {trainer.ratings?.averageRating || "5"}/5</p>
 </div>
               {/* Categories */}
               <p className="text-gray-600 text-sm">

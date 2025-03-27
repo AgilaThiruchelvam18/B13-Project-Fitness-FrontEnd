@@ -147,7 +147,7 @@ const BookingHistory = () => {
                   {booking.trainer?.userName || "Unknown Trainer"}
                 </Link>
               </p>
-              <p className="text-sm text-gray-500">Duration: {booking.classId?.duration || "N/A"} mins</p>
+              <p className="text-sm text-gray-500">Duration: {booking.classId?.duration || "-"} mins</p>
               <p className="text-sm text-gray-500">Category: {booking.category}</p>
               <p className="text-sm font-bold"></p>
               </div>

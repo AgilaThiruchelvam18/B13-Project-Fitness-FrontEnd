@@ -229,7 +229,7 @@ const handleRecurrentBooking = async (bookingDate,bookingStartTime,bookingEndTim
                   </Link>
                 </p>
                 <p className="text-yellow-500 text-md">
-                  ⭐ {booking.trainer.ratings.averageRating || "N/A"}/5
+                  ⭐ {booking.trainer.ratings.averageRating || "5"}/5
                 </p>
               </div>
               <div className="w-full flex flex-row justify-between">

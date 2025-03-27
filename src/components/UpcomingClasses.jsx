@@ -131,7 +131,7 @@ console.log("filteredClasses",filteredClasses);
                                   </Link>
                                 </p>
                                 <p className="text-yellow-500 text-md">
-                                  ⭐ {cls.trainer.ratings.averageRating || "N/A"}/5
+                                  ⭐ {cls.trainer.ratings.averageRating || "5"}/5
                                 </p>
                               </div>
                              
